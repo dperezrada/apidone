@@ -1,5 +1,4 @@
 var express = require('express');
-var mongodb = require('mongodb');
 
 var configure_app = function(app){
 	app.configure(function(){
@@ -16,21 +15,19 @@ var configure_app = function(app){
 	});
 };
 
-var connect_to_mongo = function(){
+var create_mongodb_url = function(){
 	var mongodb_host = process.env.MONGODB_HOST || 'localhost';
 	var mongodb_port = process.env.MONGODB_PORT || 27017;
 	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone';
-	var db = new mongodb.Db(mongodb_dbname, new mongodb.Server(mongodb_host, mongodb_port, {}), {native_parser:false});
-	console.log("Connecting to MongoDB " + mongodb_host + ":" + mongodb_port);
 	if(process.env.MONGODB_USER){
-		db.authenticate(process.env.MONGODB_USER, process.env.MONGODB_PASSWORD);
+		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + process.env.MONGODB_HOST + ":" + process.env.MONGODB_PORT + "/" + process.env.MONGODB_DBNAME;	
+	}else{
+		return "mongodb://" + process.env.MONGODB_HOST + ":" + process.env.MONGODB_PORT + "/" + process.env.MONGODB_DBNAME;
 	}
-	return db
 }
 
 var app = module.exports = express.createServer();
 configure_app(app);
-var db = connect_to_mongo();
 
 var clear_response = function(response_el){
 	response_el['id'] = ""+response_el['_id'];
@@ -39,7 +36,7 @@ var clear_response = function(response_el){
 	delete response_el['_internal_parent_url'];
 }
 
-db.open(function(err, db) {
+require('mongodb').connect(create_mongodb_url(), function(err, db){
     db.collection('data', function(err, collection) {
 		app.get('/*', function(request, response){
 			collection.findOne({'_internal_url': request.url}, function(error, result) {
