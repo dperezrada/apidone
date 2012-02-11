@@ -1,0 +1,6 @@
+#INSTALL
+npm install -d
+
+#RUN
+node server.js
+
