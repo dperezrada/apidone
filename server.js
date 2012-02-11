@@ -20,9 +20,9 @@ var create_mongodb_url = function(){
 	var mongodb_port = process.env.MONGODB_PORT || 27017;
 	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone';
 	if(process.env.MONGODB_USER){
-		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + process.env.MONGODB_HOST + ":" + process.env.MONGODB_PORT + "/" + process.env.MONGODB_DBNAME;	
+		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
 	}else{
-		return "mongodb://" + process.env.MONGODB_HOST + ":" + process.env.MONGODB_PORT + "/" + process.env.MONGODB_DBNAME;
+		return "mongodb://" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
 	}
 }
 
@@ -61,12 +61,12 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 		});
 		
 		app.post('/*', function(request, response){
-			collection.insert(request.body, function(error, docs) {
+			collection.insert(request.body, {'safe': true}, function(error, docs) {
 				var id = docs[0]['_id'];
 				var final_url = request.url + "/"+ id
 				collection.update({_id: id},
 		        	{
-						"$push": {
+						"$set": {
 							'_internal_url': final_url,
 							'_internal_parent_url': request.url
 						}
@@ -81,13 +81,13 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 		
 		app.put('/*', function(request, response){
 			request.body['_internal_url'] = request.url;
-			collection.update({'_internal_url': request.url}, request.body , function(error, docs) {
+			collection.update({'_internal_url': request.url}, request.body, {'safe': true}, function(error, docs) {
 				response.send();
 			});
 		});
 		
 		app.delete('/*', function(request, response){
-			collection.remove({'_internal_url': request.url}, function(error, docs) {
+			collection.remove({'$or': [{'_internal_url': request.url}, {'_internal_parent_url': {$regex : '^'+request.url}}]}, {'safe': true, 'multi': true}, function(error, docs) {
 			    response.send();
 			});
 		});
