@@ -1,12 +1,8 @@
 var express = require('express');
-var Db = require('mongodb').Db;
-var Connection = require('mongodb').Connection;
-var Server = require('mongodb').Server;
 
 var configure_app = function(app){
 	app.configure(function(){
 	  app.use(express.bodyParser());
-	  app.use(express.methodOverride());
 	  app.use(app.router);
 	});
 
@@ -19,17 +15,19 @@ var configure_app = function(app){
 	});
 };
 
-var connect_to_mongo = function(){
-	var mongodb_host = 'localhost';
-	var mongodb_port = Connection.DEFAULT_PORT;
-	console.log("Connecting to " + mongodb_host + ":" + mongodb_port);
-	return new Db('apidone', new Server(mongodb_host, mongodb_port, {}), {native_parser:false});
+var create_mongodb_url = function(){
+	var mongodb_host = process.env.MONGODB_HOST || 'localhost';
+	var mongodb_port = process.env.MONGODB_PORT || 27017;
+	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone';
+	if(process.env.MONGODB_USER){
+		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
+	}else{
+		return "mongodb://" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
+	}
 }
 
 var app = module.exports = express.createServer();
 configure_app(app);
-
-var db = connect_to_mongo();
 
 var clear_response = function(response_el){
 	response_el['id'] = ""+response_el['_id'];
@@ -38,7 +36,7 @@ var clear_response = function(response_el){
 	delete response_el['_internal_parent_url'];
 }
 
-db.open(function(err, db) {
+require('mongodb').connect(create_mongodb_url(), function(err, db){
     db.collection('data', function(err, collection) {
 		app.all('/', function(req, res, next) {
 			res.header("Access-Control-Allow-Origin", "*");
@@ -68,12 +66,12 @@ db.open(function(err, db) {
 		});
 		
 		app.post('/*', function(request, response){
-			collection.insert(request.body, function(error, docs) {
+			collection.insert(request.body, {'safe': true}, function(error, docs) {
 				var id = docs[0]['_id'];
 				var final_url = request.url + "/"+ id
 				collection.update({_id: id},
 		        	{
-						"$push": {
+						"$set": {
 							'_internal_url': final_url,
 							'_internal_parent_url': request.url
 						}
@@ -88,18 +86,17 @@ db.open(function(err, db) {
 		
 		app.put('/*', function(request, response){
 			request.body['_internal_url'] = request.url;
-			collection.update({'_internal_url': request.url}, request.body , function(error, docs) {
+			collection.update({'_internal_url': request.url}, request.body, {'safe': true}, function(error, docs) {
 				response.send();
 			});
 		});
 		
 		app.delete('/*', function(request, response){
-			collection.remove({'_internal_url': request.url}, function(error, docs) {
+			collection.remove({'$or': [{'_internal_url': request.url}, {'_internal_parent_url': {$regex : '^'+request.url}}]}, {'safe': true, 'multi': true}, function(error, docs) {
 			    response.send();
 			});
 		});
 	});
 });
-
-app.listen(3000);
+app.listen(process.env.PORT || 3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
