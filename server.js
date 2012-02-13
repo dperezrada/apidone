@@ -18,7 +18,7 @@ var configure_app = function(app){
 var create_mongodb_url = function(){
 	var mongodb_host = process.env.MONGODB_HOST || 'localhost';
 	var mongodb_port = process.env.MONGODB_PORT || 27017;
-	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone';
+	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone_test';
 	if(process.env.MONGODB_USER){
 		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
 	}else{
@@ -81,6 +81,7 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 		
 		app.put('/*', function(request, response){
 			request.body['_internal_url'] = request.url;
+			delete request.body['id'];
 			collection.update({'_internal_url': request.url}, request.body, {'safe': true}, function(error, docs) {
 				response.send();
 			});
@@ -93,5 +94,7 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 		});
 	});
 });
-app.listen(process.env.PORT || 3000);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+if (!module.parent){
+	app.listen(process.env.PORT || 3000);
+	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+}
