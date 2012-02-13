@@ -40,6 +40,11 @@ var clear_response = function(response_el){
 
 db.open(function(err, db) {
     db.collection('data', function(err, collection) {
+		app.all('/', function(req, res, next) {
+			res.header("Access-Control-Allow-Origin", "*");
+			res.header("Access-Control-Allow-Headers", "X-Requested-With");
+			next();
+		});
 		app.get('/*', function(request, response){
 			collection.findOne({'_internal_url': request.url}, function(error, result) {
 				if(result){
