@@ -79,7 +79,7 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 					},
 					function(error, doc){
 						response.header('Location', final_url);
-					    response.send();
+					    response.send({"id": id});
 					}
 				)
 			});
