@@ -46,21 +46,35 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 			next();
 		});
 		app.get('/*', function(request, response){
-			collection.findOne({'_internal_url': request.route.params[0]}, function(error, result) {
+			// Prepare conditions and selector
+			var query_params = request.query;
+			var selector = {};
+			if(query_params.id){
+				query_params['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
+				delete query_params['id'];
+			}else if(query_params._select){
+				for(var i in query_params._select){
+					selector[query_params._select[i]] = true;
+				}
+				delete query_params['_select'];
+			}
+			for(var key in query_params){
+				if(!isNaN(parseInt(query_params[key], 10))){
+					query_params[key] = {'$in': [query_params[key], parseInt(query_params[key], 10)]};
+				}
+			}
+			
+			query_params['_internal_parent_url'] = request.route.params[0];
+			
+			collection.findOne({'_internal_url': request.route.params[0]}, selector, function(error, result) {
 				if(result){
 					clear_response(result);
 					response.send(result);
-				}else{
-					var query_params = request.query;
-					if(query_params.id){
-						query_params['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
-						delete query_params['id'];
-					}
-					query_params['_internal_parent_url'] = request.route.params[0];
-					collection.find(query_params, function(error, cursor) {
+				}else{				
+					collection.find(query_params, selector, function(error, cursor) {
 						cursor.toArray(function(err, items) {
-							if(items.lenght === 0){
-								response.send({"error": "Not Found"}, 404);
+							if(items === null || items.lenght === 0){
+								response.send([]);
 							}else{
 								for(var i in items){
 									clear_response(items[i]);
