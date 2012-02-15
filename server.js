@@ -1,4 +1,5 @@
 var express = require('express');
+var mongodb = require('mongodb');
 
 var configure_app = function(app){
 	app.configure(function(){
@@ -36,7 +37,7 @@ var clear_response = function(response_el){
 	delete response_el['_internal_parent_url'];
 }
 
-require('mongodb').connect(create_mongodb_url(), function(err, db){
+mongodb.connect(create_mongodb_url(), function(err, db){
     db.collection('data', function(err, collection) {
 		app.all('/*', function(req, res, next) {
 			res.header("Access-Control-Allow-Origin", "*");
@@ -45,12 +46,18 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 			next();
 		});
 		app.get('/*', function(request, response){
-			collection.findOne({'_internal_url': request.url}, function(error, result) {
+			collection.findOne({'_internal_url': request.route.params[0]}, function(error, result) {
 				if(result){
 					clear_response(result);
 					response.send(result);
 				}else{
-					collection.find({'_internal_parent_url': request.url}, function(error, cursor) {
+					var query_params = request.query;
+					if(query_params.id){
+						query_params['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
+						delete query_params['id'];
+					}
+					query_params['_internal_parent_url'] = request.route.params[0];
+					collection.find(query_params, function(error, cursor) {
 						cursor.toArray(function(err, items) {
 							if(items.lenght === 0){
 								response.send({"error": "Not Found"}, 404);
@@ -69,12 +76,12 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 		app.post('/*', function(request, response){
 			collection.insert(request.body, {'safe': true}, function(error, docs) {
 				var id = docs[0]['_id'];
-				var final_url = request.url + "/"+ id
+				var final_url = request.route.params[0] + "/"+ id
 				collection.update({_id: id},
 		        	{
 						"$set": {
 							'_internal_url': final_url,
-							'_internal_parent_url': request.url
+							'_internal_parent_url': request.route.params[0]
 						}
 					},
 					function(error, doc){
@@ -86,15 +93,15 @@ require('mongodb').connect(create_mongodb_url(), function(err, db){
 		});
 		
 		app.put('/*', function(request, response){
-			request.body['_internal_url'] = request.url;
+			request.body['_internal_url'] = request.route.params[0];
 			delete request.body['id'];
-			collection.update({'_internal_url': request.url}, request.body, {'safe': true}, function(error, docs) {
+			collection.update({'_internal_url': request.route.params[0]}, request.body, {'safe': true}, function(error, docs) {
 				response.send();
 			});
 		});
 		
 		app.delete('/*', function(request, response){
-			collection.remove({'$or': [{'_internal_url': request.url}, {'_internal_parent_url': {$regex : '^'+request.url}}]}, {'safe': true, 'multi': true}, function(error, docs) {
+			collection.remove({'$or': [{'_internal_url': request.route.params[0]}, {'_internal_parent_url': {$regex : '^'+request.route.params[0]}}]}, {'safe': true, 'multi': true}, function(error, docs) {
 			    response.send();
 			});
 		});
