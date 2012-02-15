@@ -53,8 +53,12 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				query_params['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
 				delete query_params['id'];
 			}else if(query_params._select){
-				for(var i in query_params._select){
-					selector[query_params._select[i]] = true;
+				if(typeof query_params._select == "string"){
+					selector[query_params._select] = true;
+				}else{
+					for(var i in query_params._select){
+						selector[query_params._select[i]] = true;
+					}
 				}
 				delete query_params['_select'];
 			}
