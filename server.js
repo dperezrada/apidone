@@ -19,7 +19,7 @@ var configure_app = function(app){
 var create_mongodb_url = function(){
 	var mongodb_host = process.env.MONGODB_HOST || 'localhost';
 	var mongodb_port = process.env.MONGODB_PORT || 27017;
-	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone_test';
+	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone_dev';
 	if(process.env.MONGODB_USER){
 		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
 	}else{

@@ -4,3 +4,5 @@ npm install -d
 #RUN
 node server.js
 
+#TESTS
+make test
