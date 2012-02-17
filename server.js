@@ -41,7 +41,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 	app.all('/*', function(req, res, next) {
 		var server_host = process.env.APIDONE_HOST || 'apidone.com';
 		req.subdomain = req.headers.host.split("."+server_host)[0];
-		if(req.headers.host == "apidone.herokuapp.com" || !req.subdomain){
+		if(req.headers.host == "apidone.herokuapp.com" || req.headers.host == "www.apidone.com" || req.headers.host == "apidone.com"){
 			req.subdomain = "base";
 		}
 		req.subdomain = req.subdomain.replace('.', '_')
