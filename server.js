@@ -38,14 +38,20 @@ var clear_response = function(response_el){
 }
 
 mongodb.connect(create_mongodb_url(), function(err, db){
-    db.collection('data', function(err, collection) {
-		app.all('/*', function(req, res, next) {
-			res.header("Access-Control-Allow-Origin", "*");
-			res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
-			res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
-			next();
-		});
-		app.get('/*', function(request, response){
+	app.all('/*', function(req, res, next) {
+		var server_host = process.env.APIDONE_HOST || 'apidone.com';
+		req.subdomain = req.headers.host.split("."+server_host)[0];
+		if(req.headers.host == "apidone.herokuapp.com" || !req.subdomain){
+			req.subdomain = "base";
+		}
+		req.subdomain = req.subdomain.replace('.', '_')
+		res.header("Access-Control-Allow-Origin", "*");
+		res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
+		res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+		next();
+	});
+	app.get('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
 			// Prepare conditions and selector
 			var query_params = request.query;
 			var selector = {};
@@ -90,8 +96,10 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				}
 			});
 		});
-		
-		app.post('/*', function(request, response){
+	});
+	
+	app.post('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
 			collection.insert(request.body, {'safe': true}, function(error, docs) {
 				var id = docs[0]['_id'];
 				var final_url = request.route.params[0] + "/"+ id
@@ -109,18 +117,22 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				)
 			});
 		});
-		
-		app.put('/*', function(request, response){
+	});
+	
+	app.put('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
 			request.body['_internal_url'] = request.route.params[0];
 			delete request.body['id'];
 			collection.update({'_internal_url': request.route.params[0]}, request.body, {'safe': true}, function(error, docs) {
 				response.send();
 			});
 		});
-		
-		app.delete('/*', function(request, response){
+	});
+	
+	app.delete('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
 			collection.remove({'$or': [{'_internal_url': request.route.params[0]}, {'_internal_parent_url': {$regex : '^'+request.route.params[0]}}]}, {'safe': true, 'multi': true}, function(error, docs) {
-			    response.send();
+		    	response.send();
 			});
 		});
 	});
