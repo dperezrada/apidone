@@ -103,6 +103,9 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 								response.send(result);
 							});
 						});
+					}else{
+						clear_response(result);
+						response.send(result);
 					}
 				}else{				
 					collection.find(query_params, selector, function(error, cursor) {
