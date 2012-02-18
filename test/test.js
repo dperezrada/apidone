@@ -87,6 +87,46 @@ exports['test list_select_some_values'] = function(done){
   	});
 };
 
+// TODO: FIX: TIMEOUT PROBLEM
+// exports['test get_one'] = function(done){
+// 	browser.get('/countries', function(res, obj){
+// 		res.body.should.eql([]);
+// 		browser.post('/countries', {body: '{"name": "Chile", "capital": "Santiago"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+// 			var created_id = res.body['id'];
+// 			browser.get('/countries/'+created_id, function(res, obj){
+// 				// ASSERTS
+// 				res.body.should.eql({"id": created_id, "name": "Chile", "capital": "Santiago"});
+// 				// TEAR DOWN
+// 				browser.delete('/countries/'+created_id, function(res, obj){
+// 	    			done();
+// 				});
+// 			});
+// 		});
+//   	});
+// };
+
+exports['test show_resource_with_posible_lists'] = function(done){
+	browser.get('/countries', function(res, obj){
+		res.body.should.eql([]);
+		browser.post('/countries', {body: '{"name": "Chile", "capital": "Santiago"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+			var created_id = res.body['id'];
+			browser.post('/countries/'+created_id+'/cities', {body: '{"name": "Valparaiso"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+				var child_created_id = res.body['id'];
+				browser.get('/countries/'+created_id+"?_childs=true", function(res, obj){
+
+					// ASSERTS
+					res.body.should.eql({"id": created_id, "name": "Chile", "capital": "Santiago", "cities": [{"id": child_created_id, "name": "Valparaiso"}]});
+
+					// TEAR DOWN
+					browser.delete('/countries/'+created_id, function(res, obj){
+		    			done();
+					});
+				});
+			});
+		});
+  	});
+};
+
 
 
 

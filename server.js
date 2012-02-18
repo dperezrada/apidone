@@ -36,11 +36,16 @@ var clear_response = function(response_el){
 	delete response_el['_internal_url'];
 	delete response_el['_internal_parent_url'];
 }
+var clean_child = function(parent_url, response_el){
+	var resource_type = response_el['_internal_parent_url'].replace(parent_url+'/', '');
+	clear_response(response_el);
+	return {'type': resource_type, 'child': response_el};
+}
 
 mongodb.connect(create_mongodb_url(), function(err, db){
 	app.all('/*', function(req, res, next) {
 		var server_host = process.env.APIDONE_HOST || 'apidone.com';
-		req.subdomain = req.headers.host.split("."+server_host)[0];
+		req.subdomain = process.env.APIDONE_DEFAULT_SUBDOMAIN || req.headers.host.split("."+server_host)[0];
 		if(req.headers.host == "apidone.herokuapp.com" || req.headers.host == "www.apidone.com" || req.headers.host == "apidone.com"){
 			req.subdomain = "base";
 		}
@@ -73,13 +78,32 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 					query_params[key] = {'$in': [query_params[key], parseInt(query_params[key], 10)]};
 				}
 			}
+						
 			
 			query_params['_internal_parent_url'] = request.route.params[0];
 			
 			collection.findOne({'_internal_url': request.route.params[0]}, selector, function(error, result) {
 				if(result){
-					clear_response(result);
-					response.send(result);
+					if(query_params._childs){
+						collection.find({'_internal_parent_url': {'$regex': '^'+request.route.params[0]+'/[^/]*$'}}, function(error, cursor) {
+							cursor.toArray(function(err, items) {
+								if(items === null || items.lenght === 0){
+								}else{
+									for(var i in items){
+										var one_child = clean_child(request.route.params[0], items[i]);
+										if(!result[one_child['type']]){
+											result[one_child['type']] = [one_child['child']];
+										}else{
+											result[one_child['type']].push(one_child['child']);
+										}
+									}
+								}
+
+								clear_response(result);
+								response.send(result);
+							});
+						});
+					}
 				}else{				
 					collection.find(query_params, selector, function(error, cursor) {
 						cursor.toArray(function(err, items) {
@@ -102,7 +126,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 		db.collection(request.subdomain, function(err, collection) {
 			collection.insert(request.body, {'safe': true}, function(error, docs) {
 				var id = docs[0]['_id'];
-				var final_url = request.route.params[0] + "/"+ id
+				var final_url = request.route.params[0] + "/"+ id;
 				collection.update({_id: id},
 		        	{
 						"$set": {

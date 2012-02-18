@@ -6,6 +6,7 @@ test:
 	@MONGODB_DBNAME=apidone_test \
 	MONGODB_HOST=localhost \
 	MONGODB_PORT=27017 \
+	APIDONE_DEFAULT_SUBDOMAIN=data \
 	./node_modules/.bin/mocha \
 		--timeout 4s \
 		--slow 1000 \
