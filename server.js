@@ -111,14 +111,14 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 					query_params['_internal_parent_url'] = request.route.params[0];
 					collection.find(query_params, selector, function(error, cursor) {
 						cursor.toArray(function(err, items) {
-							if(items === null || items.lenght === 0){
+							if(items === null || items.length === 0){
 								response.send([]);
+
 							}else{
 								// Verificar si es o no es un recurso
 								var output = [];
 								var resource_ids = [];	
 								for(var i in items){
-									console.log(items[i].resource);
 									clear_response(items[i]);
 									if (typeof items[i].resource == "undefined") {
 										output.push(items[i]);
@@ -134,7 +134,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 												output.push(items[i]);	
 											}
 										}
-										response.send(result);
+										response.send(output);
 									});
 								});
 							}
