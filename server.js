@@ -60,10 +60,12 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 			// Prepare conditions and selector
 			var query_params = request.query;
 			var selector = {};
+			// Change id to _id
 			if(query_params.id){
 				query_params['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
 				delete query_params['id'];
 			}else if(query_params._select){
+				// Return only some attributes
 				if(typeof query_params._select == "string"){
 					selector[query_params._select] = true;
 				}else{
@@ -73,14 +75,12 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				}
 				delete query_params['_select'];
 			}
+			// Filter results
 			for(var key in query_params){
 				if(!isNaN(parseInt(query_params[key], 10))){
 					query_params[key] = {'$in': [query_params[key], parseInt(query_params[key], 10)]};
 				}
 			}
-						
-			
-			query_params['_internal_parent_url'] = request.route.params[0];
 			
 			collection.findOne({'_internal_url': request.route.params[0]}, selector, function(error, result) {
 				if(result){
@@ -107,16 +107,36 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 						clear_response(result);
 						response.send(result);
 					}
-				}else{				
+				}else{
+					query_params['_internal_parent_url'] = request.route.params[0];
 					collection.find(query_params, selector, function(error, cursor) {
 						cursor.toArray(function(err, items) {
 							if(items === null || items.lenght === 0){
 								response.send([]);
 							}else{
+								// Verificar si es o no es un recurso
+								var output = [];
+								var resource_ids = [];	
 								for(var i in items){
+									console.log(items[i].resource);
 									clear_response(items[i]);
+									if (typeof items[i].resource == "undefined") {
+										output.push(items[i]);
+									} else {
+										resource_ids.push(items[i].resource);
+									}	
 								}
-								response.send(items);
+								collection.find({'_internal_url': {'$in': resource_ids}}, function(error, cursor) {
+									cursor.toArray(function(err, items) {
+										if (items) {
+											for(var i in items){
+												clear_response(items[i]);
+												output.push(items[i]);	
+											}
+										}
+										response.send(result);
+									});
+								});
 							}
 						});
 					});
@@ -141,7 +161,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 						response.header('Location', final_url);
 					    response.send({"id": id});
 					}
-				)
+				);
 			});
 		});
 	});
