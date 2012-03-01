@@ -42,6 +42,7 @@ var clean_child = function(parent_url, response_el){
 	return {'type': resource_type, 'child': response_el};
 }
 
+
 mongodb.connect(create_mongodb_url(), function(err, db){
 	app.all('/*', function(req, res, next) {
 		var server_host = process.env.APIDONE_HOST || 'apidone.com';
@@ -49,11 +50,24 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 		if(req.headers.host == "apidone.herokuapp.com" || req.headers.host == "www.apidone.com" || req.headers.host == "apidone.com"){
 			req.subdomain = "base";
 		}
-		req.subdomain = req.subdomain.replace('.', '_')
-		res.header("Access-Control-Allow-Origin", "*");
-		res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
-		res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
-		next();
+		req.subdomain = req.subdomain.replace('.', '_');
+		db.collection('accounts', function(err, collection) {
+			collection.findOne({'collection': req.subdomain}, function(error, result) {
+				if(result){
+					if(req.method in { POST:1, PUT:1, DELETE:1 } && result['require_key_update']){
+						if(req.query['ak'] != result['key']){
+							res.statusCode = 403;
+							res.end('Forbidden');
+    						return;
+						}
+					}
+				}
+				res.header("Access-Control-Allow-Origin", "*");
+				res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
+				res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+				next();
+			});
+		});
 	});
 	app.get('/*', function(request, response){
 		db.collection(request.subdomain, function(err, collection) {

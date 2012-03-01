@@ -8,14 +8,23 @@ var tobi = require('tobi')
   , should = require('should');
 // Test app
 
+var mongodb = require('mongodb');
+
 var app = require('../server')
   , browser = tobi.createBrowser(app);
 
-exports['test delete'] = function(done){
+// Setup Clean the database
+exports.beforeEach = function(done){
 	browser.delete('/countries', function(res, obj){
 		browser.delete('/dentists', function(res, obj){
 			browser.delete('/patients', function(res, obj){
-				done();
+				mongodb.connect(create_mongodb_url(), function(err, db){
+					db.collection('accounts', function(err, collection) {
+						collection.remove({}, {'safe': true, 'multi': true}, function(error, docs) {
+							done();
+						});
+					});
+				});
 			});
 		});
 	});
@@ -156,8 +165,45 @@ exports['test relate_resources'] = function(done){
   	});
 };
 
+create_mongodb_url = function(){
+	var mongodb_host = process.env.MONGODB_HOST_TEST || 'localhost';
+	var mongodb_port = process.env.MONGODB_PORT_TEST || 27017;
+	var mongodb_dbname = process.env.MONGODB_DBNAME_TEST || 'apidone_test';
+	if(process.env.MONGODB_USER){
+		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
+	}else{
+		return "mongodb://" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
+	}
+}
+
+exports['test key_auth'] = function(done){
+	mongodb.connect(create_mongodb_url(), function(err, db){
+		db.collection('accounts', function(err, collection) {
+			collection.insert(
+				{'collection': 'data', 'require_key_read': false, 'require_key_update': true, 'key': 'mfmlqwktfovs3nD6voD1492Bfgy0ao6puaq6ivzgoyq#jti#Acs2Cnylssp#amuCe'},
+				{'safe': true},
+				function(error, docs) {
+					browser.get('/dentists', function(res, obj){
+						res.statusCode.should.eql(200);
+						browser.post('/dentists?ak=hola', {body: '{"name": "Daniel"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+							res.statusCode.should.eql(403);
+							browser.put('/dentists?ak=hola', {body: '{"name": "Daniel"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+								res.statusCode.should.eql(403);
+								browser.delete('/dentists?ak=hola', {body: '{"name": "Daniel"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+									res.statusCode.should.eql(403);
+									done();
+								});
+							});
+						});
+					});
+				}
+			);
+		});
+	});
+};
 
 
 exports.after = function(){
+	console.log('termino');
 	app.close();
 };
