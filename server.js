@@ -184,8 +184,13 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 		db.collection(request.subdomain, function(err, collection) {
 			request.body['_internal_url'] = request.route.params[0];
 			delete request.body['id'];
-			collection.update({'_internal_url': request.route.params[0]}, request.body, {'safe': true}, function(error, docs) {
-				response.send();
+			collection.findOne({'_internal_url': request.route.params[0]}, {'_internal_parent_url': true}, function(error, result) {
+				if(result){
+					request.body['_internal_parent_url'] = result['_internal_parent_url'];
+					collection.update({'_internal_url': request.route.params[0]}, request.body, {'safe': true}, function(error, docs) {
+						response.send();
+					});
+				}
 			});
 		});
 	});

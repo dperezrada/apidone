@@ -203,6 +203,28 @@ exports['test key_auth'] = function(done){
 };
 
 
+exports['test update'] = function(done){
+	browser.get('/countries', function(res, obj){
+		res.body.should.eql([]);
+		browser.post('/countries', {body: '{"name": "Chile", "capital": "Santiago"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+			var created_id = res.body['id'];
+			browser.put('/countries/'+created_id, {body: '{"name": "Chile", "capital": "Santiago", "primary_language": "spanish"}', headers: {'Content-Type': 'application/json'}}, function(res, obj){
+				browser.get('/countries', function(res, obj){
+
+					// ASSERTS
+					res.body.should.eql([{"id": created_id, "name": "Chile", "capital": "Santiago", "primary_language": "spanish"}]);
+
+					// TEAR DOWN
+					browser.delete('/countries/'+created_id, function(res, obj){
+		    			done();
+					});
+				});
+			});
+		});
+  	});
+};
+
+
 exports.after = function(){
 	console.log('termino');
 	app.close();
