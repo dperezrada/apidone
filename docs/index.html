@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>APIdone Documentation</title>
+  <meta name="description" content="APIdone Documentation">
+  <meta name="author" content="Daniel">
+  <link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,700' rel='stylesheet' type='text/css'>
+  <link href='assets/css/layout.css' rel='stylesheet' type='text/css'>
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+<body data-spy="scroll" data-target="#navbar" data-offset="0">
+	<div id="navbar" class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">API done</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#use_it">Use it</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="main container">
+    	<div id="about">
+			<h1>APIdone</h1>
+			<div class="small_hero">
+				<h3>A ready to use API</h3>
+				<p>Start creating your project right away, you only have to worry about the clients side.</p>
+			</div>
+		</div>
+
+		<div id="features">
+			<h1>Features</h1>
+			<div class="small_hero">
+				<ul>
+					<li>JSON representations</li>
+					<li>RESTFULL</li>
+					<li>Cross domain AJAX request (GET, POST, PUT and DELETE) from any site</li>
+					<li>No configuration require</li>
+					<li>Secure</li>
+					<li>You can protect resources with authentication</li>
+				</ul>
+			</div>
+		</div>
+
+		<div id="use_it">
+			<h1>Use it</h1>
+			<div class="small_hero">
+				APIdone, doesn't have any structure, you create the structure that fits your needs.
+			</div>
+
+			<h2>TODO list example</h2>
+			<div class="small_hero">
+				Let's create a simple TODO list, using curl.
+			</div>
+			<div class="small_hero">
+				<h3>This will be the API</h3>
+				<table class="table">
+				  <thead>
+				    <tr>
+				      <th>Method</th>
+				      <th>url</th>
+					  <th>description</th>
+				    </tr>
+				  </thead>
+				  <tbody>
+				    <tr>
+				      <td>GET</td>
+				      <td>/tasks</td>
+				      <td>List tasks</td>
+				    </tr>
+					<tr>
+				      <td>POST</td>
+				      <td>/tasks</td>
+				      <td>Create task</td>
+				    </tr>
+					<tr>
+				      <td>PUT</td>
+				      <td>/tasks/:id</td>
+				      <td>Update task</td>
+				    </tr>
+					<tr>
+				      <td>DELETE</td>
+				      <td>/tasks/:id</td>
+				      <td>Delete task</td>
+				    </tr>
+					<tr>
+				      <td>GET</td>
+				      <td>/tasks?status=done</td>
+				      <td>Lost done tasks</td>
+				    </tr>
+				    <tr>
+				      <td>GET</td>
+				      <td>/tasks?status=pending</td>
+				      <td>List pending tasks</td>
+				    </tr>
+					<tr>
+				      <td>POST</td>
+				      <td>/tasks/:id/notes</td>
+				      <td>Create a task note</td>
+				    </tr>
+				    <tr>
+				      <td>GET</td>
+				      <td>/tasks/:id/notes</td>
+				      <td>List task notes</td>
+				    </tr>
+				  </tbody>
+				</table>
+			</div>
+			
+			<div class="small_hero">
+				<h2>The API is already done, let's use it.</h2>
+			</div>
+
+			<h3>Create Task</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl -d '{"name": "Buy milk", "status": "pending"}' -H "Content-Type: application/json" http://demo.apidone.com/tasks
+				</code>
+				<h4>Response</h4>
+				<pre>
+{
+	"id":"4f529689643aec0100000003"
+}
+				</pre>
+			</div>
+
+			<h3>Update Task</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl -X PUT -d '{"name": "Buy milk", "status": "done"}' -H "Content-Type: application/json" http://demo.apidone.com/tasks/4f529689643aec0100000003
+				</code>
+				<h4>Response</h4>
+				<pre>
+[
+	{
+		"id":"4f528be517952b0100000002",
+		"name":"List task"
+	}
+]
+				</pre>
+			</div>
+
+			<h3>Create another task</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl -d '{"name": "Write review", "status": "pending"}' -H "Content-Type: application/json" http://demo.apidone.com/tasks
+				</code>
+				<h4>Response</h4>
+				<pre>
+{
+	"id":"4f52973f643aec0100000004"
+}
+				</pre>
+			</div>
+
+			<h3>List Task</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl http://demo.apidone.com/tasks
+				</code>
+				<h4>Response</h4>
+				<pre>
+[
+	{
+		"id":"4f529689643aec0100000003",
+		"name":"Finish documentation",
+		"status":"done"
+	},
+	{
+		"id":"4f52973f643aec0100000004",
+		"name":"Write review",
+		"status":"pending"
+	}
+]
+				</pre>
+			</div>
+
+			<h3>List done tasks</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl http://demo.apidone.com/tasks?status=done
+				</code>
+				<h4>Response</h4>
+				<pre>
+[
+	{
+		"id":"4f529689643aec0100000003",
+		"name":"Finish documentation",
+		"status":"done"
+	}
+]
+				</pre>
+			</div>
+
+			<h3>List pending tasks</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl http://demo.apidone.com/tasks?status=pending
+				</code>
+				<h4>Response</h4>
+				<pre>
+[
+	{
+		"id":"4f52973f643aec0100000004",
+		"name":"Write review",
+		"status":"pending"
+	}
+]
+				</code>
+			</div>
+
+			<h3>Create task note</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl -d '{"text": "Did not find the url"}' -H "Content-Type: application/json" http://demo.apidone.com/tasks/4f52973f643aec0100000004/notes
+				</code>
+				<h4>Response</h4>
+				<pre>
+{
+	"id":"4f529e3e643aec0100000005"
+}
+				</pre>
+			</div>
+
+			<h3>List notes</h3>
+			<div class="large_hero">
+				<h4>Command</h4>
+				<code>
+					curl http://demo.apidone.com/tasks/4f52973f643aec0100000004/notes
+				</code>
+				<h4>Response</h4>
+				<pre>
+[
+	{
+		"text":"Did not find the url",
+		"id":"4f529e3e643aec0100000005"
+	}
+]
+
+				</pre>
+			</div>
+
+		</div>
+
+
+    </div> <!-- /container -->
+
+	<script type="text/javascript" src="assets/js/jquery.js"></script>
+    <script type="text/javascript" src="assets/js/bootstrap.js"></script>
+    <script type="text/javascript" src="assets/js/bootstrap-scrollspy.js"></script>
+        
+</body>
+</html>
