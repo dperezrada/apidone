@@ -224,6 +224,16 @@ exports['test update'] = function(done){
   	});
 };
 
+exports['test cors'] = function(done){
+	browser.get('/countries', function(res, obj){
+		res.headers.should.have.property("access-control-allow-origin");
+		res.headers.should.have.property("access-control-allow-headers");
+		res.headers.should.have.property("access-control-allow-methods");
+		done();
+	});
+};
+
+
 
 exports.after = function(){
 	console.log('termino');

@@ -27,9 +27,6 @@ var create_mongodb_url = function(){
 	}
 }
 
-var app = module.exports = express.createServer();
-configure_app(app);
-
 var clear_response = function(response_el){
 	response_el['id'] = ""+response_el['_id'];
 	delete response_el['_id'];
@@ -42,33 +39,100 @@ var clean_child = function(parent_url, response_el){
 	return {'type': resource_type, 'child': response_el};
 }
 
+var retrieve_subdomain = function(request){
+	var server_host = process.env.APIDONE_HOST || 'apidone.com';
+	var subdomain = process.env.APIDONE_DEFAULT_SUBDOMAIN || request.headers.host.split("."+server_host)[0];
+	if(request.headers.host == "apidone.herokuapp.com" || request.headers.host == "www.apidone.com" || request.headers.host == "apidone.com"){
+		subdomain = "base";
+	}
+	return subdomain.replace('.', '_');
+};
 
-mongodb.connect(create_mongodb_url(), function(err, db){
-	app.all('/*', function(req, res, next) {
-		var server_host = process.env.APIDONE_HOST || 'apidone.com';
-		req.subdomain = process.env.APIDONE_DEFAULT_SUBDOMAIN || req.headers.host.split("."+server_host)[0];
-		if(req.headers.host == "apidone.herokuapp.com" || req.headers.host == "www.apidone.com" || req.headers.host == "apidone.com"){
-			req.subdomain = "base";
-		}
-		req.subdomain = req.subdomain.replace('.', '_');
-		db.collection('accounts', function(err, collection) {
-			collection.findOne({'collection': req.subdomain}, function(error, result) {
-				if(result){
-					if(req.method in { POST:1, PUT:1, DELETE:1 } && result['require_key_update']){
-						if(req.query['ak'] != result['key']){
-							res.statusCode = 403;
-							res.end('Forbidden');
-    						return;
-						}
+var check_auth = function(db, request, response, ok_callback){
+	db.collection('accounts', function(err, collection) {
+		collection.findOne({'collection': request.subdomain}, function(error, result) {
+			if(result){
+				if(request.method in { POST:1, PUT:1, DELETE:1 } && result['require_key_update']){
+					if(request.query['ak'] != result['key']){
+						response.statusCode = 403;
+						response.end('Forbidden');
+						return;
 					}
 				}
-				res.header("Access-Control-Allow-Origin", "*");
-				res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
-				res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
-				next();
+			}
+			ok_callback();
+		});
+	});
+}
+
+var set_cors = function(response){
+	response.header("Access-Control-Allow-Origin", "*");
+	response.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
+	response.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+}
+
+var app = module.exports = express.createServer();
+configure_app(app);
+
+
+mongodb.connect(create_mongodb_url(), function(err, db){
+
+	app.all('/*', function(request, response, next) {
+		request.subdomain = retrieve_subdomain(request);
+		check_auth(db, request, response, function(){
+			set_cors(response);
+			next();
+		});
+	});
+	
+	app.post('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
+			collection.insert(request.body, {'safe': true}, function(error, docs) {
+				var id = docs[0]['_id'];
+				var final_url = request.route.params[0] + "/"+ id;
+				collection.update({_id: id},
+		        	{
+						"$set": {
+							'_internal_url': final_url,
+							'_internal_parent_url': request.route.params[0]
+						}
+					},
+					function(error, doc){
+						response.header('Location', final_url);
+					    response.send({"id": id});
+					}
+				);
 			});
 		});
 	});
+	
+	app.put('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
+			request.body['_internal_url'] = request.route.params[0];
+			delete request.body['id'];
+			collection.findOne({'_internal_url': request.route.params[0]}, {'_internal_parent_url': true}, function(error, result) {
+				if(result){
+					request.body['_internal_parent_url'] = result['_internal_parent_url'];
+					collection.update({'_internal_url': request.route.params[0]}, request.body, {'safe': true}, function(error, docs) {
+						response.send();
+					});
+				}
+			});
+		});
+	});
+	
+	app.delete('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
+			collection.remove(
+				{'$or': [{'_internal_url': request.route.params[0]}, {'_internal_parent_url': {$regex : '^'+request.route.params[0]}}]},
+				{'safe': true, 'multi': true},
+				function(error, docs) {
+	    			response.send();
+				}
+			);
+		});
+	});
+
 	app.get('/*', function(request, response){
 		db.collection(request.subdomain, function(err, collection) {
 			// Prepare conditions and selector
@@ -158,50 +222,8 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 			});
 		});
 	});
-	
-	app.post('/*', function(request, response){
-		db.collection(request.subdomain, function(err, collection) {
-			collection.insert(request.body, {'safe': true}, function(error, docs) {
-				var id = docs[0]['_id'];
-				var final_url = request.route.params[0] + "/"+ id;
-				collection.update({_id: id},
-		        	{
-						"$set": {
-							'_internal_url': final_url,
-							'_internal_parent_url': request.route.params[0]
-						}
-					},
-					function(error, doc){
-						response.header('Location', final_url);
-					    response.send({"id": id});
-					}
-				);
-			});
-		});
-	});
-	
-	app.put('/*', function(request, response){
-		db.collection(request.subdomain, function(err, collection) {
-			request.body['_internal_url'] = request.route.params[0];
-			delete request.body['id'];
-			collection.findOne({'_internal_url': request.route.params[0]}, {'_internal_parent_url': true}, function(error, result) {
-				if(result){
-					request.body['_internal_parent_url'] = result['_internal_parent_url'];
-					collection.update({'_internal_url': request.route.params[0]}, request.body, {'safe': true}, function(error, docs) {
-						response.send();
-					});
-				}
-			});
-		});
-	});
-	
-	app.delete('/*', function(request, response){
-		db.collection(request.subdomain, function(err, collection) {
-			collection.remove({'$or': [{'_internal_url': request.route.params[0]}, {'_internal_parent_url': {$regex : '^'+request.route.params[0]}}]}, {'safe': true, 'multi': true}, function(error, docs) {
-		    	response.send();
-			});
-		});
-	});
+
+
 });
 if (!module.parent){
 	app.listen(process.env.PORT || 3000);
