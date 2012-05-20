@@ -1,4 +1,4 @@
 node_modules
-data
-backups
+logs/*
 .DS_Store
+old

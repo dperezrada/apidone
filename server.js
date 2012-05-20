@@ -19,8 +19,16 @@ var configure_app = function(app){
 var retrieve_subdomain = function(request){
 	var server_host = process.env.APIDONE_HOST || 'apidone.com';
 	var subdomain = process.env.APIDONE_DEFAULT_SUBDOMAIN || request.headers.host.split("."+server_host)[0];
+	console.log(subdomain);
 	return subdomain.replace('.', '_');
 };
+
+var clear_response = function(response_el){
+	response_el['id'] = ""+response_el['_id'];
+	delete response_el['_id'];
+	delete response_el['_internal_url'];
+	delete response_el['_internal_parent_url'];
+}
 
 
 var create_mongodb_url = function(){
@@ -62,6 +70,33 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 					    response.send({"id": id});
 					}
 				);
+			});
+		});
+	});
+	
+	app.get('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
+			collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, result) {
+				if(result){
+					clear_response(result);
+					response.send(result);
+				}else{
+					collection.find({'_internal_parent_url': request.route.params[0]}, {}, function(error, cursor) {
+						cursor.toArray(function(err, items) {
+							if(items === null || items.length === 0){
+								response.send([]);
+
+							}else{
+								var output = [];
+								for(var i in items){
+									clear_response(items[i]);
+									output.push(items[i]);
+								}
+								response.send(output);
+							}
+						});
+					});
+				}
 			});
 		});
 	});

@@ -17,8 +17,10 @@ export APIDONE_HOST=localhost
 export APIDONE_PORT=3001
 export APIDONE_DEFAULT_SUBDOMAIN=test
 
+mkdir -p logs
 echo "Starting the server"
 nohup node server.js test_apidone > logs/server.log &
+sleep 1;
 
 echo "Running tests"
 ./node_modules/.bin/mocha;
