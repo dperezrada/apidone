@@ -23,7 +23,7 @@ nohup node server.js test_apidone > logs/server.log &
 sleep 1;
 
 echo "Running tests"
-./node_modules/.bin/mocha;
+./node_modules/.bin/mocha -b;
 
 PROCESS_ID=`ps -ef | grep "node" | grep "test_api" | grep -v "grep" | awk '{print $2}'`;
 echo "Stopping server, process_id: $PROCESS_ID"
