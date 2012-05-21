@@ -21,7 +21,7 @@ var get_movies = function(obj, callback){
 	);
 };
 
-describe('Get new resource when GET to /<resources>/:resource_id', function(){
+describe('List resources', function(){
 	before(function(done){
 		self = this;
 		self.movies = [
@@ -40,8 +40,20 @@ describe('Get new resource when GET to /<resources>/:resource_id', function(){
 	after(function(done){
  		require('./tear_down')(done);
 	});
-	it('should get the correct movie', function(done){
-		assert.deepEqual(self.movies, JSON.parse(self.list_response.body));
-		done();
-	});
+	describe('Get new resource when GET to /<resources>/:resource_id', function(){
+		it('should get the correct movie', function(done){
+			assert.deepEqual(self.movies, JSON.parse(self.list_response.body));
+			done();
+		});		
+	})
+	describe('Filter resources by doing GET to /<resources>/:resource_id?filter', function(){
+		it('should get the correct movie', function(done){
+			request.get({url: utils.absolute_url('/movies?year=1999')}, 
+				function (e, response, body){
+					assert.deepEqual([{'id': self.movies[0].id, 'name': 'The Matrix', 'year': 1999}], JSON.parse(body));
+					done();
+				}
+			);
+		});		
+	})
 });

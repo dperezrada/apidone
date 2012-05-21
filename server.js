@@ -80,7 +80,19 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 					clear_response(result);
 					response.send(result);
 				}else{
-					collection.find({'_internal_parent_url': request.route.params[0]}, {}, function(error, cursor) {
+					var filters = request.query;
+					if(filters.id){
+						filters['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
+						delete filters['id'];
+					}
+					// Search for numbers as string and integer
+					for(var key in filters){
+						if(!isNaN(parseInt(filters[key], 10))){
+							filters[key] = {'$in': [filters[key], parseInt(filters[key], 10)]};
+						}
+					}
+					filters['_internal_parent_url'] = request.route.params[0];
+					collection.find(filters, {}, function(error, cursor){
 						cursor.toArray(function(err, items) {
 							if(items === null || items.length === 0){
 								// odd numbers have id, so didn't found it
@@ -123,7 +135,6 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 		db.collection(request.subdomain, function(err, collection) {
 			collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, resource) {
 				if(resource){
-					console.log(request.body);
 					request.body['_internal_url'] = resource['_internal_url'];
 					request.body['_internal_parent_url'] = resource['_internal_parent_url'];
 					if(request.body['id']){
