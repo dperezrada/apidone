@@ -12,10 +12,10 @@ var create_movie = function(movie_json, callback){
 		}
 	);
 };
-var get_movies = function(callback){
+var get_movies = function(obj, callback){
 	request.get({url: utils.absolute_url('/movies')}, 
 		function (e, response, body){
-			self.list_response = response;
+			obj.list_response = response;
 			callback();
 		}
 	);
@@ -32,7 +32,7 @@ describe('Get new resource when GET to /<resources>/:resource_id', function(){
 			[
 				async.apply(create_movie, self.movies[0]),
 				async.apply(create_movie, self.movies[1]),
-				get_movies
+				async.apply(get_movies, self)
 			],
 			function(err, results){done();}
 		);

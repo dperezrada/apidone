@@ -80,16 +80,17 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 					clear_response(result);
 					response.send(result);
 				}else{
-					// odd numbers have id, so didn't found it
-					if(request.route.params[0].split('/').length % 2 == 0){
-						response.statusCode = 404
-						response.send({});
-						return;
-					}
 					collection.find({'_internal_parent_url': request.route.params[0]}, {}, function(error, cursor) {
 						cursor.toArray(function(err, items) {
 							if(items === null || items.length === 0){
-								response.send([]);
+								// odd numbers have id, so didn't found it
+								if(request.route.params[0].split('/').length % 2 == 0){
+									response.statusCode = 404
+									response.send({});
+									return;
+								}else{
+									response.send([]);
+								}
 							}else{
 								var output = [];
 								for(var i in items){
@@ -117,6 +118,30 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 			});
 		});
 	});
+	
+	app.put('/*', function(request, response){
+		db.collection(request.subdomain, function(err, collection) {
+			collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, resource) {
+				if(resource){
+					console.log(request.body);
+					request.body['_internal_url'] = resource['_internal_url'];
+					request.body['_internal_parent_url'] = resource['_internal_parent_url'];
+					if(request.body['id']){
+						delete request.body['id'];
+					}
+					collection.update({'_internal_url': request.route.params[0]}, request.body, function(error, result) {
+						response.statusCode = 204;
+						response.send();
+					});
+				}else{
+					// TODO: CREATE
+					response.statusCode = 404;
+					response.send();
+				}
+			});
+		});
+	});
+
 });
 
 if (!module.parent){

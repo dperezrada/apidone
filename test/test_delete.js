@@ -23,7 +23,13 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id', f
 		async.series(
 			[
 				async.apply(create_movie, self.movies[0]),
-				async.apply(create_movie, self.movies[1])
+				async.apply(create_movie, self.movies[1]),
+				function(callback){
+					request.del({url: utils.absolute_url('/movies/'+self.movies[0].id)}, function(err, response){
+						self.delete_response = response;
+						done();
+					});
+				}
 			],
 			function(err, results){done();}
 		);
@@ -32,10 +38,8 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id', f
  		require('./tear_down')(done);
 	});
 	it('should return 204 as status code', function(done){
-		request.del({url: utils.absolute_url('/movies/'+self.movies[0].id)}, function(err, response){
-			assert.equal(204, response.statusCode);
-			done();
-		});
+		assert.equal(204, self.delete_response.statusCode);
+		done();
 	});
 	it('should not be able to get the resource', function(done){
 		request.get({url: utils.absolute_url('/movies/'+self.movies[0].id)}, function(err, response){
