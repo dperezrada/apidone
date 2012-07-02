@@ -23,6 +23,12 @@ var retrieve_subdomain = function(request){
 	return subdomain.replace('.', '_');
 };
 
+var retrieve_collection = function(request){
+	var subdomain = retrieve_subdomain(request);
+	var base_resource = request.route.params[0].split('/')[0];
+	return subdomain+'___'+base_resource;
+}
+
 var clear_response = function(response_el){
 	response_el['id'] = ""+response_el['_id'];
 	delete response_el['_id'];
@@ -75,7 +81,8 @@ var Mongo = {
 mongodb.connect(create_mongodb_url(), function(err, db){
 	
 	app.all('/*', function(request, response, next) {
-		request.subdomain = retrieve_subdomain(request);
+		request.collection = retrieve_collection(request);
+		console.log(request.collection);
 		set_cors(response);
 		next();
 	});
@@ -83,7 +90,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 	app.post('/*', function(request, response){
 		async.waterfall(
 			[
-				async.apply(Mongo.get_collection, db, request.subdomain),
+				async.apply(Mongo.get_collection, db, request.collection),
 				function(collection, callback){
 					Mongo.insert(collection, request.body, function(err, inserted_docs){
 						callback(err, inserted_docs[0]['_id'], collection);
@@ -117,18 +124,18 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				filters[key] = {'$in': [filters[key], parseInt(filters[key], 10)]};
 			}
 		}
-		filters['_internal_parent_url'] = request.route.params[0];
 		return filters;
 	}
 	
 	app.get('/*', function(request, response){
-		db.collection(request.subdomain, function(err, collection) {
+		db.collection(request.collection, function(err, collection) {
 			collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, result) {
 				if(result){
 					clear_response(result);
 					response.send(result);
 				}else{
 					var filters = prepare_db_filters(request.query);
+					filters['_internal_parent_url'] = request.route.params[0];
 					collection.find(filters, {}, function(error, cursor){
 						cursor.toArray(function(err, items) {
 							if(items === null || items.length === 0){
@@ -155,7 +162,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 		});
 	});
 	app.delete('/*', function(request, response){
-		db.collection(request.subdomain, function(err, collection) {
+		db.collection(request.collection, function(err, collection) {
 			collection.remove({'_internal_url': request.route.params[0]}, {}, function(error, result) {
 				if(result){
 					response.statusCode = 204;
@@ -169,7 +176,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 	});
 	
 	app.put('/*', function(request, response){
-		db.collection(request.subdomain, function(err, collection) {
+		db.collection(request.collection, function(err, collection) {
 			collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, resource) {
 				if(resource){
 					request.body['_internal_url'] = resource['_internal_url'];

@@ -1,6 +1,7 @@
 var request = require('request')
 	, assert = require('assert')
-	, utils = require('./utils');
+	, utils = require('./utils')
+	, mongodb = require('mongodb');
 
 var self;
 describe('New resources when POST to /<resources>', function(){
@@ -23,5 +24,15 @@ describe('New resources when POST to /<resources>', function(){
 	it('should return the id after creating a new resource', function(done){;
 		assert.ok(self.create_response.body.id);
 		done();
+	});
+	it('Check collection', function(done){;
+		mongodb.connect(utils.create_mongodb_url(), function(err, db){
+			db.collection('test___movies', function(err, collection) {
+				collection.findOne({'_internal_url': 'movies/'+self.create_response.body.id}, {}, function(error, result) {
+					assert.ok(result);
+					done();
+				})
+			});
+		});
 	});
 });

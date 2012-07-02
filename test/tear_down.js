@@ -13,7 +13,7 @@ var create_mongodb_url = function(){
 
 module.exports = function(callback){
 	mongodb.connect(create_mongodb_url(), function(err, db){
-		db.collection(process.env.APIDONE_DEFAULT_SUBDOMAIN, function(err, collection) {
+		db.collection('test___movies', function(err, collection) {
 			collection.remove({}, function(err, done) {
 				callback();
 			});
