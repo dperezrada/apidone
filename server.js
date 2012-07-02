@@ -26,6 +26,7 @@ var retrieve_subdomain = function(request){
 var retrieve_collection = function(request){
 	var subdomain = retrieve_subdomain(request);
 	var base_resource = request.route.params[0].split('/')[0];
+	if(base_resource == '__resources') base_resource = '';
 	return subdomain+'___'+base_resource;
 }
 
@@ -34,6 +35,7 @@ var clear_response = function(response_el){
 	delete response_el['_id'];
 	delete response_el['_internal_url'];
 	delete response_el['_internal_parent_url'];
+	delete response_el['_internal_parent_resource'];
 }
 
 
@@ -63,11 +65,14 @@ var Mongo = {
 	insert: function(collection, data, callback){ collection.insert(data, {'safe': true}, callback); },
 	update_internal_url: function(parent_url, id, collection, callback){
 		var final_url = parent_url + "/"+ id;
+		var splited_url = parent_url.split('/')
+		var resource = splited_url[splited_url.length -1]
 		collection.update({_id: id},
         	{
 				"$set": {
 					'_internal_url': final_url,
-					'_internal_parent_url': parent_url
+					'_internal_parent_url': parent_url,
+					'_internal_parent_resource': resource
 				}
 			},
 			function(error, doc){
@@ -75,14 +80,29 @@ var Mongo = {
 			}
 		);
 	},
-	update: function(collection, selector, query, callback){collection.update(selector, query, callback)}
+	update: function(collection, selector, query, callback){collection.update(selector, query, callback)},
+	get_collections = function(db, subdomain, callback){
+		db.collectionNames(function(err, collections){
+			var collections_return = []
+			var db_name = process.env.MONGODB_DBNAME || 'apidone_dev';
+			var collection = subdomain+'___';
+			var collection_start = db_name+"."+collection
+			for (var i = collections.length - 1; i >= 0; i--){
+				if(collections[i]['name'].indexOf(collection_start) == 0){
+					collections_return.push(collections[i]['name'].replace(collection_start, ''));
+				}
+			};
+			callback(err, collections_return);
+		});
 };
+
+var 
+}
 
 mongodb.connect(create_mongodb_url(), function(err, db){
 	
 	app.all('/*', function(request, response, next) {
 		request.collection = retrieve_collection(request);
-		console.log(request.collection);
 		set_cors(response);
 		next();
 	});
@@ -128,38 +148,51 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 	}
 	
 	app.get('/*', function(request, response){
-		db.collection(request.collection, function(err, collection) {
-			collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, result) {
-				if(result){
-					clear_response(result);
-					response.send(result);
+		if(request.route.params[0] == '__resources'){
+			Mongo.get_collections(db, retrieve_subdomain(request), function(err, collections){
+				response.send(collections);
+			});
+		}else{
+			db.collection(request.collection, function(err, collection) {
+				if(request.route.params[0].indexOf('__resources')>0){
+					var internal_parent_url = request.route.params[0].replace('/__resources', '')
+					collection.distinct('_internal_parent_resource', {'_internal_parent_url': {$regex : '^'+internal_parent_url+'/[^\/]+$'}}, function(error, resources){
+						response.send(resources);
+					});
 				}else{
-					var filters = prepare_db_filters(request.query);
-					filters['_internal_parent_url'] = request.route.params[0];
-					collection.find(filters, {}, function(error, cursor){
-						cursor.toArray(function(err, items) {
-							if(items === null || items.length === 0){
-								// odd numbers have id, so didn't found it
-								if(request.route.params[0].split('/').length % 2 == 0){
-									response.statusCode = 404
-									response.send({});
-									return;
-								}else{
-									response.send([]);
-								}
-							}else{
-								var output = [];
-								for(var i in items){
-									clear_response(items[i]);
-									output.push(items[i]);
-								}
-								response.send(output);
-							}
-						});
+					collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, result) {
+						if(result){
+							clear_response(result);
+							response.send(result);
+						}else{
+							var filters = prepare_db_filters(request.query);
+							filters['_internal_parent_url'] = request.route.params[0];
+							collection.find(filters, {}, function(error, cursor){
+								cursor.toArray(function(err, items) {
+									if(items === null || items.length === 0){
+										// odd numbers have id, so didn't found it
+										if(request.route.params[0].split('/').length % 2 == 0){
+											response.statusCode = 404
+											response.send({});
+											return;
+										}else{
+											response.send([]);
+										}
+									}else{
+										var output = [];
+										for(var i in items){
+											clear_response(items[i]);
+											output.push(items[i]);
+										}
+										response.send(output);
+									}
+								});
+							});
+						}
 					});
 				}
 			});
-		});
+		}
 	});
 	app.delete('/*', function(request, response){
 		db.collection(request.collection, function(err, collection) {
@@ -181,6 +214,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				if(resource){
 					request.body['_internal_url'] = resource['_internal_url'];
 					request.body['_internal_parent_url'] = resource['_internal_parent_url'];
+					request.body['_internal_parent_resource'] = resource['_internal_parent_resource'];
 					if(request.body['id']){
 						delete request.body['id'];
 					}

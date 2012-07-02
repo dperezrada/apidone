@@ -1,3 +1,4 @@
+var async = require('async');
 var mongodb = require('mongodb');
 // TODO: REFACTOR
 var create_mongodb_url = function(){
@@ -13,10 +14,14 @@ var create_mongodb_url = function(){
 
 module.exports = function(callback){
 	mongodb.connect(create_mongodb_url(), function(err, db){
-		db.collection('test___movies', function(err, collection) {
-			collection.remove({}, function(err, done) {
-				callback();
-			});
+		db.collectionNames(function(err, collections){
+			async.forEach(['test___movies', 'test___countries'], function(collection_name, callback1){
+				db.collection(collection_name, function(err, collection) {
+					collection.remove({}, function(err, done) {
+						callback1();
+					});
+				});
+			}, callback);
 		});
 	});
 };
