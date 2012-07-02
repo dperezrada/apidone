@@ -40,13 +40,13 @@ describe('List resources', function(){
 	after(function(done){
  		require('./tear_down')(done);
 	});
-	describe('Get new resource when GET to /<resources>/:resource_id', function(){
-		it('should get the correct movie', function(done){
+	describe('List resources by doing GET to /<resources>', function(){
+		it('should get the list of movies', function(done){
 			assert.deepEqual(self.movies, JSON.parse(self.list_response.body));
 			done();
-		});		
-	})
-	describe('Filter resources by doing GET to /<resources>/:resource_id?filter', function(){
+		});
+	});
+	describe('Filter resources by doing GET to /<resources>?filter with number filter', function(){
 		it('should get the correct movie', function(done){
 			request.get({url: utils.absolute_url('/movies?year=1999')}, 
 				function (e, response, body){
@@ -54,6 +54,16 @@ describe('List resources', function(){
 					done();
 				}
 			);
-		});		
-	})
+		});	
+	});
+	describe('Filter resources by doing GET to /<resources>?filter with text filter', function(){
+		it('should get the correct movie', function(done){
+			request.get({url: utils.absolute_url('/movies?name=Nine%20queens')}, 
+				function (e, response, body){
+					assert.deepEqual([{'id': self.movies[1].id, 'name': 'Nine queens', 'year': 2000}], JSON.parse(body));
+					done();
+				}
+			);
+		});	
+	});
 });

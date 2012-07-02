@@ -1,5 +1,6 @@
 var express = require('express');
 var mongodb = require('mongodb');
+var async = require('async');
 
 var configure_app = function(app){
 	app.configure(function(){
@@ -41,37 +42,84 @@ var create_mongodb_url = function(){
 	}
 }
 
+var set_cors = function(response){
+	response.header("Access-Control-Allow-Origin", "*");
+	response.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
+	response.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+}
+
+
 var app = module.exports = express.createServer();
 configure_app(app);
+
+var Mongo = {
+	get_collection: function(db, name, callback){ db.collection(name, callback); },
+	insert: function(collection, data, callback){ collection.insert(data, {'safe': true}, callback); },
+	update_internal_url: function(parent_url, id, collection, callback){
+		var final_url = parent_url + "/"+ id;
+		collection.update({_id: id},
+        	{
+				"$set": {
+					'_internal_url': final_url,
+					'_internal_parent_url': parent_url
+				}
+			},
+			function(error, doc){
+				callback(error, final_url, id);
+			}
+		);
+	},
+	update: function(collection, selector, query, callback){collection.update(selector, query, callback)}
+};
 
 mongodb.connect(create_mongodb_url(), function(err, db){
 	
 	app.all('/*', function(request, response, next) {
 		request.subdomain = retrieve_subdomain(request);
+		set_cors(response);
 		next();
 	});
 	
 	app.post('/*', function(request, response){
-		db.collection(request.subdomain, function(err, collection) {
-			collection.insert(request.body, {'safe': true}, function(error, docs) {
-				var id = docs[0]['_id'];
-				var final_url = request.route.params[0] + "/"+ id;
-				collection.update({_id: id},
-		        	{
-						"$set": {
-							'_internal_url': final_url,
-							'_internal_parent_url': request.route.params[0]
-						}
-					},
-					function(error, doc){
-						response.statusCode = 201;
-						response.header('Location', final_url);
-					    response.send({"id": id});
-					}
-				);
-			});
-		});
+		async.waterfall(
+			[
+				async.apply(Mongo.get_collection, db, request.subdomain),
+				function(collection, callback){
+					Mongo.insert(collection, request.body, function(err, inserted_docs){
+						callback(err, inserted_docs[0]['_id'], collection);
+					});
+				},
+				async.apply(Mongo.update_internal_url, request.route.params[0]),
+			],
+			function(err, final_url, id){
+				if(err){
+					console.error(err);
+					response.statusCode = 503;
+					response.send('Internal Server Error')
+				}else{
+					response.statusCode = 201;
+					response.header('Location', final_url);
+			    	response.send({"id": id});
+				}
+			}
+		);
 	});
+	
+	var prepare_db_filters = function(query_string){
+		var filters = query_string;
+		if(filters.id){
+			filters['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
+			delete filters['id'];
+		}
+		// Search for numbers as string and integer
+		for(var key in filters){
+			if(!isNaN(parseInt(filters[key], 10))){
+				filters[key] = {'$in': [filters[key], parseInt(filters[key], 10)]};
+			}
+		}
+		filters['_internal_parent_url'] = request.route.params[0];
+		return filters;
+	}
 	
 	app.get('/*', function(request, response){
 		db.collection(request.subdomain, function(err, collection) {
@@ -80,18 +128,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 					clear_response(result);
 					response.send(result);
 				}else{
-					var filters = request.query;
-					if(filters.id){
-						filters['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
-						delete filters['id'];
-					}
-					// Search for numbers as string and integer
-					for(var key in filters){
-						if(!isNaN(parseInt(filters[key], 10))){
-							filters[key] = {'$in': [filters[key], parseInt(filters[key], 10)]};
-						}
-					}
-					filters['_internal_parent_url'] = request.route.params[0];
+					var filters = prepare_db_filters(request.query);
 					collection.find(filters, {}, function(error, cursor){
 						cursor.toArray(function(err, items) {
 							if(items === null || items.length === 0){
