@@ -1,6 +1,7 @@
 var express = require('express');
 var mongodb = require('mongodb');
 var async = require('async');
+var _ = require('underscore');
 
 var configure_app = function(app){
 	app.configure(function(){
@@ -19,7 +20,8 @@ var configure_app = function(app){
 
 var retrieve_subdomain = function(request){
 	var server_host = process.env.APIDONE_HOST || 'apidone.com';
-	var subdomain = process.env.APIDONE_DEFAULT_SUBDOMAIN || request.headers.host.split("."+server_host)[0];
+	var subdomain = process.env.APIDONE_DEFAULT_SUBDOMAIN || 
+		request.headers.host.split("."+server_host)[0];
 	return subdomain.replace('.', '_');
 };
 
@@ -44,15 +46,21 @@ var create_mongodb_url = function(){
 	var mongodb_port = process.env.MONGODB_PORT || 27017;
 	var mongodb_dbname = process.env.MONGODB_DBNAME || 'apidone_dev';
 	if(process.env.MONGODB_USER){
-		return "mongodb://" + process.env.MONGODB_USER + ":" + process.env.MONGODB_PASSWORD + "@" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
+		return "mongodb://" + process.env.MONGODB_USER + ":" + 
+			process.env.MONGODB_PASSWORD + "@" + mongodb_host + ":" + 
+			mongodb_port + "/" + mongodb_dbname;
 	}else{
-		return "mongodb://" + mongodb_host + ":" + mongodb_port + "/" + mongodb_dbname;
+		return "mongodb://" + mongodb_host + ":" + mongodb_port + "/" + 
+			mongodb_dbname;
 	}
 }
 
 var set_cors = function(response){
 	response.header("Access-Control-Allow-Origin", "*");
-	response.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
+	response.header(
+		"Access-Control-Allow-Headers",
+		"X-Requested-With,Content-Type"
+	);
 	response.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
 }
 
@@ -61,8 +69,12 @@ var app = module.exports = express.createServer();
 configure_app(app);
 
 var Mongo = {
-	get_collection: function(db, name, callback){ db.collection(name, callback); },
-	insert: function(collection, data, callback){ collection.insert(data, {'safe': true}, callback); },
+	get_collection: function(db, name, callback){
+		db.collection(name, callback);
+	},
+	insert: function(collection, data, callback){
+		collection.insert(data, {'safe': true}, callback);
+	},
 	update_internal_url: function(parent_url, id, collection, callback){
 		var final_url = parent_url + "/"+ id;
 		var splited_url = parent_url.split('/')
@@ -80,8 +92,10 @@ var Mongo = {
 			}
 		);
 	},
-	update: function(collection, selector, query, callback){collection.update(selector, query, callback)},
-	get_collections = function(db, subdomain, callback){
+	update: function(collection, selector, query, callback){
+		collection.update(selector, query, callback)
+	},
+	get_collections: function(db, subdomain, callback){
 		db.collectionNames(function(err, collections){
 			var collections_return = []
 			var db_name = process.env.MONGODB_DBNAME || 'apidone_dev';
@@ -89,15 +103,15 @@ var Mongo = {
 			var collection_start = db_name+"."+collection
 			for (var i = collections.length - 1; i >= 0; i--){
 				if(collections[i]['name'].indexOf(collection_start) == 0){
-					collections_return.push(collections[i]['name'].replace(collection_start, ''));
+					collections_return.push(
+						{'name': collections[i]['name'].replace(collection_start, '')}
+					);
 				}
 			};
 			callback(err, collections_return);
-		});
+		})
+	}
 };
-
-var 
-}
 
 mongodb.connect(create_mongodb_url(), function(err, db){
 	
@@ -112,9 +126,11 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 			[
 				async.apply(Mongo.get_collection, db, request.collection),
 				function(collection, callback){
-					Mongo.insert(collection, request.body, function(err, inserted_docs){
-						callback(err, inserted_docs[0]['_id'], collection);
-					});
+					Mongo.insert(
+						collection, request.body, function(err, inserted_docs){
+							callback(err, inserted_docs[0]['_id'], collection);
+						}
+					);
 				},
 				async.apply(Mongo.update_internal_url, request.route.params[0]),
 			],
@@ -149,47 +165,54 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 	
 	app.get('/*', function(request, response){
 		if(request.route.params[0] == '__resources'){
-			Mongo.get_collections(db, retrieve_subdomain(request), function(err, collections){
-				response.send(collections);
-			});
+			Mongo.get_collections(db, retrieve_subdomain(request),
+				function(err, collections){
+
+					response.send(collections);
+				}
+			);
 		}else{
 			db.collection(request.collection, function(err, collection) {
 				if(request.route.params[0].indexOf('__resources')>0){
 					var internal_parent_url = request.route.params[0].replace('/__resources', '')
-					collection.distinct('_internal_parent_resource', {'_internal_parent_url': {$regex : '^'+internal_parent_url+'/[^\/]+$'}}, function(error, resources){
-						response.send(resources);
+					collection.distinct('_internal_parent_resource', {
+						'_internal_parent_url': {$regex : '^'+internal_parent_url+'/[^\/]+$'}
+					}, function(error, resources){
+						response.send(_.map(resources, function(resource){ return {'name': resource}}));
 					});
 				}else{
-					collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, result) {
-						if(result){
-							clear_response(result);
-							response.send(result);
-						}else{
-							var filters = prepare_db_filters(request.query);
-							filters['_internal_parent_url'] = request.route.params[0];
-							collection.find(filters, {}, function(error, cursor){
-								cursor.toArray(function(err, items) {
-									if(items === null || items.length === 0){
-										// odd numbers have id, so didn't found it
-										if(request.route.params[0].split('/').length % 2 == 0){
-											response.statusCode = 404
-											response.send({});
-											return;
+					collection.findOne({'_internal_url': request.route.params[0]}, {}, 
+						function(error, result) {
+							if(result){
+								clear_response(result);
+								response.send(result);
+							}else{
+								var filters = prepare_db_filters(request.query);
+								filters['_internal_parent_url'] = request.route.params[0];
+								collection.find(filters, {}, function(error, cursor){
+									cursor.toArray(function(err, items) {
+										if(items === null || items.length === 0){
+											// odd numbers have id, so didn't found it
+											if(request.route.params[0].split('/').length % 2 == 0){
+												response.statusCode = 404
+												response.send({});
+												return;
+											}else{
+												response.send([]);
+											}
 										}else{
-											response.send([]);
+											var output = [];
+											for(var i in items){
+												clear_response(items[i]);
+												output.push(items[i]);
+											}
+											response.send(output);
 										}
-									}else{
-										var output = [];
-										for(var i in items){
-											clear_response(items[i]);
-											output.push(items[i]);
-										}
-										response.send(output);
-									}
+									});
 								});
-							});
+							}
 						}
-					});
+					);
 				}
 			});
 		}
