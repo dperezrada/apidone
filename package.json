@@ -3,11 +3,12 @@
   , "version": "0.1.0"
   , "private": true
   , "dependencies": {
-      "express": ">= 0.0.1"
+      "express": "2.5.9"
     , "mongodb": ">= 0.0.1"
 	, "mocha": ">= 0.0.1"
 	, "request": ">= 0.0.1"
 	, "underscore": ">= 0.0.1"
 	, "async": ">= 0.0.1"
+    , "zlib": ">= 0.0.1"
   }
 }
