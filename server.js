@@ -61,7 +61,7 @@ var set_cors = function(response){
 		"Access-Control-Allow-Headers",
 		"X-Requested-With,Content-Type"
 	);
-	response.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+	response.header("Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,DELETE");
 }
 
 
