@@ -25,7 +25,9 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id', f
 				async.apply(create_movie, self.movies[0]),
 				async.apply(create_movie, self.movies[1]),
 				function(callback){
-					request.del({url: utils.absolute_url('/movies/'+self.movies[0].id)}, function(err, response){
+					request.del({
+						url: utils.absolute_url('/movies/'+self.movies[0].id)
+					}, function(err, response){
 						self.delete_response = response;
 						done();
 					});
@@ -42,8 +44,51 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id', f
 		done();
 	});
 	it('should not be able to get the resource', function(done){
-		request.get({url: utils.absolute_url('/movies/'+self.movies[0].id)}, function(err, response){
-			assert.equal(404, response.statusCode);
+		request.get({
+			url: utils.absolute_url('/movies/'+self.movies[0].id)
+		}, function(err, response, body){
+			assert.deepEqual([], JSON.parse(body));
+			done();
+		});
+	});
+
+});
+
+describe('Delete all new resource by sending DELETE to /<resources>', function(){
+	before(function(done){
+		self = this;
+		self.movies = [
+			{'name': 'The Matrix', 'year': 1999},
+			{'name': 'Nine queens', 'year': 2000}
+		]
+		async.series(
+			[
+				async.apply(create_movie, self.movies[0]),
+				async.apply(create_movie, self.movies[1]),
+				function(callback){
+					request.del({
+						url: utils.absolute_url('/movies?_remove=all')
+					}, function(err, response){
+						self.delete_response = response;
+						done();
+					});
+				}
+			],
+			function(err, results){done();}
+		);
+	});
+	after(function(done){
+ 		require('./tear_down')(done);
+	});
+	it('should return 204 as status code', function(done){
+		assert.equal(204, self.delete_response.statusCode);
+		done();
+	});
+	it('should not be able to get the resource', function(done){
+		request.get({
+			url: utils.absolute_url('/movies')
+		}, function(err, response){
+			assert.equal('[]', response.body);
 			done();
 		});
 	});
