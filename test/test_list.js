@@ -66,4 +66,26 @@ describe('List resources', function(){
 			);
 		});	
 	});
+	describe('Get not found resources', function(){
+		it('should return empty []', function(done){
+			request.get({url: utils.absolute_url('/not_existing_resource')}, 
+				function (e, response, body){
+					assert.deepEqual([], JSON.parse(body));
+					assert.equal(200, response.statusCode);
+					done();
+				}
+			);
+		});	
+	});
+	describe('Get not found resources with default', function(){
+		it('should return empty {}', function(done){
+			request.get({url: utils.absolute_url('/none_existing?_default={}')}, 
+				function (e, response, body){
+					assert.deepEqual({}, JSON.parse(body));
+					assert.equal(200, response.statusCode);
+					done();
+				}
+			);
+		});	
+	});
 });

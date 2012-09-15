@@ -4,7 +4,7 @@
   , "private": true
   , "dependencies": {
       "express": "2.5.9"
-    , "mongodb": ">= 0.0.1"
+    , "mongodb": "latest"
 	, "mocha": ">= 0.0.1"
 	, "request": ">= 0.0.1"
 	, "underscore": ">= 0.0.1"

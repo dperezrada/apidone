@@ -4,19 +4,17 @@ var async = require('async');
 var utils = require('./utils');
 var self;
 
-var create_movie = function(obj, callback){
-	request.post({url: utils.absolute_url('/movies'), json: {'name': 'The Matrix', 'year': 1999}},
+var create_movie = function(json, callback){
+	request.post({url: utils.absolute_url('/movies'), json: json},
 		function (err, response, body){
-			obj.movie_id = response.body.id;
-			callback();
+			callback(err, response.body.id);
 		}
 	);
 };
-var get_movie =	function(obj, callback){
-	request.get({url: utils.absolute_url('/movies/'+obj.movie_id)}, 
+var get_movie =	function(movie_id, callback){
+	request.get({url: utils.absolute_url('/movies/'+movie_id)}, 
 		function (e, response, body){
-			obj.get_response = response;
-			callback();
+			callback(e, movie_id, response);
 		}
 	);
 };
@@ -24,12 +22,17 @@ var get_movie =	function(obj, callback){
 describe('Get new resource when GET to /<resources>/:resource_id', function(){
 	before(function(done){
 		self = this;
-		async.series(
+
+		async.waterfall(
 			[
-				async.apply(create_movie, self),
-				async.apply(get_movie, self),
+				async.apply(create_movie, {'name': 'The Matrix', 'year': 1999}),
+				get_movie,
 			],
-			function(err, results){done();}
+			function(err, movie_id, response){
+				self.movie_id = movie_id;
+				self.response = response;
+				done();
+			}
 		);
 	});
 	after(function(done){
@@ -40,7 +43,36 @@ describe('Get new resource when GET to /<resources>/:resource_id', function(){
 			'id': self.movie_id,
 			'name': 'The Matrix',
 			'year': 1999
-		}, JSON.parse(self.get_response.body));
+		}, JSON.parse(self.response.body));
 		done();
 	});
 });
+
+describe('Get new resource when GET to /<resources>/:resource_id created with id', function(){
+	before(function(done){
+		self = this;
+
+		async.waterfall(
+			[
+				async.apply(create_movie, {'id': 'machuca', 'name': 'Machuca', 'year': 2004}),
+				get_movie,
+			],
+			function(err, movie_id, response){
+				self.movie_id = movie_id;
+				self.response = response;
+				done();
+			}
+		);
+	});
+	after(function(done){
+ 		require('./tear_down')(done);
+	});
+	it('should get the correct movie', function(done){
+		assert.deepEqual({
+			'id': 'machuca',
+			'name': 'Machuca',
+			'year': 2004
+		}, JSON.parse(self.response.body));
+		done();
+	});
+});	

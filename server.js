@@ -33,7 +33,9 @@ var retrieve_collection = function(request){
 }
 
 var clear_response = function(response_el){
-	response_el['id'] = ""+response_el['_id'];
+	if(!response_el['id']){
+		response_el['id'] = ""+response_el['_id'];
+	}
 	delete response_el['_id'];
 	delete response_el['_internal_url'];
 	delete response_el['_internal_parent_url'];
@@ -75,20 +77,22 @@ var Mongo = {
 	insert: function(collection, data, callback){
 		collection.insert(data, {'safe': true}, callback);
 	},
-	update_internal_url: function(parent_url, id, collection, callback){
-		var final_url = parent_url + "/"+ id;
-		var splited_url = parent_url.split('/')
-		var resource = splited_url[splited_url.length -1]
-		collection.update({_id: id},
+	update_internal_url: function(final_url, _id, collection, callback){
+		var splited_url = final_url.split('/');
+		var resource_id = splited_url[splited_url.length -1];
+		var resource = splited_url[splited_url.length -2];
+		var parent_url = _.initial(splited_url).join("/");
+		collection.update({_id: _id},
         	{
 				"$set": {
 					'_internal_url': final_url,
 					'_internal_parent_url': parent_url,
-					'_internal_parent_resource': resource
+					'_internal_parent_resource': resource,
+					'id': resource_id,
 				}
 			},
 			function(error, doc){
-				callback(error, final_url, id);
+				callback(error, final_url, resource_id);
 			}
 		);
 	},
@@ -128,11 +132,17 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				function(collection, callback){
 					Mongo.insert(
 						collection, request.body, function(err, inserted_docs){
-							callback(err, inserted_docs[0]['_id'], collection);
+							var _id = inserted_docs[0]['_id'];
+							var id = _id;
+							if(request.body.id){
+								id = request.body.id;
+							}
+							_internal_url = request.route.params[0]+"/"+id;
+							callback(err, _internal_url, _id, collection);
 						}
 					);
 				},
-				async.apply(Mongo.update_internal_url, request.route.params[0]),
+				Mongo.update_internal_url,
 			],
 			function(err, final_url, id){
 				if(err){
@@ -191,22 +201,18 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 								filters['_internal_parent_url'] = request.route.params[0];
 								collection.find(filters, {}, function(error, cursor){
 									cursor.toArray(function(err, items) {
+										var to_return = [];
 										if(items === null || items.length === 0){
-											// odd numbers have id, so didn't found it
-											if(request.route.params[0].split('/').length % 2 == 0){
-												response.statusCode = 404
-												response.send({});
-												return;
-											}else{
-												response.send([]);
+											if(request.query._default){
+												to_return = request.query._default;
 											}
+											response.send(to_return);
 										}else{
-											var output = [];
 											for(var i in items){
 												clear_response(items[i]);
-												output.push(items[i]);
+												to_return.push(items[i]);
 											}
-											response.send(output);
+											response.send(to_return);
 										}
 									});
 								});
@@ -219,7 +225,13 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 	});
 	app.delete('/*', function(request, response){
 		db.collection(request.collection, function(err, collection) {
-			collection.remove({'_internal_url': request.route.params[0]}, {}, function(error, result) {
+			if(request.query._remove == 'all'){
+				query = {$regex : '^'+request.route.params[0]}
+			}
+			else{
+				query = request.route.params[0]
+			}
+			collection.remove({'_internal_url': query}, {}, function(error, result) {
 				if(result){
 					response.statusCode = 204;
 					response.send();
@@ -232,31 +244,72 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 	});
 	
 	app.put('/*', function(request, response){
-		db.collection(request.collection, function(err, collection) {
-			collection.findOne({'_internal_url': request.route.params[0]}, {}, function(error, resource) {
-				if(resource){
-					request.body['_internal_url'] = resource['_internal_url'];
-					request.body['_internal_parent_url'] = resource['_internal_parent_url'];
-					request.body['_internal_parent_resource'] = resource['_internal_parent_resource'];
-					if(request.body['id']){
-						delete request.body['id'];
-					}
-					collection.update({'_internal_url': request.route.params[0]}, request.body, function(error, result) {
-						response.statusCode = 204;
-						response.send();
-					});
-				}else{
-					// TODO: CREATE
-					response.statusCode = 404;
+		var found_resource = false;
+		
+		var splited_url = request.route.params[0].split('/')
+		var resource_id = splited_url[splited_url.length -1]
+		
+		if(request.body['id']){
+			delete request.body['id'];
+		}
+		async.waterfall(
+			[
+				async.apply(Mongo.get_collection, db, request.collection),
+				function(collection, callback){
+					collection.findOne(
+						{'_internal_url': request.route.params[0]}, {},
+						function(error, resource) {
+							if(resource){
+								found_resource = true;
+								request.body['_id'] = resource['_id'];
+								collection.update(
+									{'_internal_url': request.route.params[0]},
+									request.body,
+									function(error, result) {
+										callback(
+											error,
+											resource['_internal_url'],
+											resource['_id'],
+											collection
+										);
+									}
+								)
+							}else{
+								Mongo.insert(
+									collection, request.body, function(err, inserted_docs){
+										callback(
+											error,
+											request.route.params[0],
+											inserted_docs[0]['_id'],
+											collection
+										);
+									}
+								);
+							}
+						}
+					);
+				},
+				Mongo.update_internal_url,
+			],
+			function(err, final_url, id){
+				if(err){
+					console.error(err);
+					response.statusCode = 503;
+					response.send('Internal Server Error')
+				}else if(found_resource){
+					response.statusCode = 204;
 					response.send();
+				} else{
+					response.statusCode = 201;
+					response.header('Location', final_url);
+			    	response.send({"id": id});
 				}
-			});
-		});
+			}
+		);
 	});
-
 });
 
 if (!module.parent){
-	app.listen(process.env.PORT	 || 3000);	
+	app.listen(process.env.APIDONE_PORT || process.env.PORT	 || 3000);	
 	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 }

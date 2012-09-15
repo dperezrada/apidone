@@ -40,7 +40,7 @@ describe('List all resources', function(){
  		require('./tear_down')(done);
 	});
 	it('should receive all the existing resources on GET /__resources ', function(done){
-		assert.deepEqual(self.resources_list, ['countries', 'movies']);
+		assert.deepEqual(self.resources_list, [{name: 'countries'}, {name: 'movies'}]);
 		done();
 	});
 	it('should receive all the existing resources on GET /countries/:id/__resources ', function(done){
@@ -52,7 +52,7 @@ describe('List all resources', function(){
 				async.apply(get_resources, self, '/countries/'+self.results[1])
 			],
 			function(err, results){
-				assert.deepEqual(self.resources_list, ['people', 'music_groups']);
+				assert.deepEqual(self.resources_list, [{name: 'people'}, {name: 'music_groups'}]);
 				done();
 			}
 		)
