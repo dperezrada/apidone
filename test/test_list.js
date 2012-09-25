@@ -42,7 +42,7 @@ describe('List resources', function(){
 	});
 	describe('List resources by doing GET to /<resources>', function(){
 		it('should get the list of movies', function(done){
-			assert.deepEqual(self.movies, JSON.parse(self.list_response.body));
+			assert.deepEqual([self.movies[1], self.movies[0]], JSON.parse(self.list_response.body));
 			done();
 		});
 	});
@@ -88,4 +88,26 @@ describe('List resources', function(){
 			);
 		});	
 	});
+	describe('Sort by', function(){
+		it('should return results sorted', function(done){
+			request.get({url: utils.absolute_url('/movies?_sort_by=year&_sort_type=asc')}, 
+				function (e, response, body){
+					assert.deepEqual([{'id': self.movies[0].id, 'name': 'The Matrix', 'year': 1999}, {'id': self.movies[1].id, 'name': 'Nine queens', 'year': 2000}], JSON.parse(body));
+					done();
+				}
+			);
+		});	
+	});
+	describe('Select_distinct', function(){
+		it('should return only one field', function(done){
+			request.get({url: utils.absolute_url('/movies?_select_distinct=name')}, 
+				function (e, response, body){
+					assert.deepEqual([{'name': 'The Matrix'}, {'name': 'Nine queens'}], JSON.parse(body));
+					done();
+				}
+			);
+		});	
+	});
+
+	
 });

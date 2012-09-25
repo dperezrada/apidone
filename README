@@ -1,0 +1,6 @@
+#Install
+npm install -d
+npm update
+
+#Run test
+./run_test.sh

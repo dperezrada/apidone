@@ -118,195 +118,221 @@ var Mongo = {
 };
 
 mongodb.connect(create_mongodb_url(), function(err, db){
-	
-	app.all('/*', function(request, response, next) {
-		request.collection = retrieve_collection(request);
-		set_cors(response);
-		next();
-	});
-	
-	app.post('/*', function(request, response){
-		async.waterfall(
-			[
-				async.apply(Mongo.get_collection, db, request.collection),
-				function(collection, callback){
-					Mongo.insert(
-						collection, request.body, function(err, inserted_docs){
-							var _id = inserted_docs[0]['_id'];
-							var id = _id;
-							if(request.body.id){
-								id = request.body.id;
+	if(!err){
+		app.all('/*', function(request, response, next) {
+			request.collection = retrieve_collection(request);
+			set_cors(response);
+			next();
+		});
+		
+		app.post('/*', function(request, response){
+			async.waterfall(
+				[
+					async.apply(Mongo.get_collection, db, request.collection),
+					function(collection, callback){
+						Mongo.insert(
+							collection, request.body, function(err, inserted_docs){
+								var _id = inserted_docs[0]['_id'];
+								var id = _id;
+								if(request.body.id){
+									id = request.body.id;
+								}
+								_internal_url = request.route.params[0]+"/"+id;
+								callback(err, _internal_url, _id, collection);
 							}
-							_internal_url = request.route.params[0]+"/"+id;
-							callback(err, _internal_url, _id, collection);
-						}
-					);
-				},
-				Mongo.update_internal_url,
-			],
-			function(err, final_url, id){
-				if(err){
-					console.error(err);
-					response.statusCode = 503;
-					response.send('Internal Server Error')
-				}else{
-					response.statusCode = 201;
-					response.header('Location', final_url);
-			    	response.send({"id": id});
-				}
-			}
-		);
-	});
-	
-	var prepare_db_filters = function(query_string){
-		var filters = query_string;
-		if(filters.id){
-			filters['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
-			delete filters['id'];
-		}
-		// Search for numbers as string and integer
-		for(var key in filters){
-			if(!isNaN(parseInt(filters[key], 10))){
-				filters[key] = {'$in': [filters[key], parseInt(filters[key], 10)]};
-			}
-		}
-		return filters;
-	}
-	
-	app.get('/*', function(request, response){
-		if(request.route.params[0] == '__resources'){
-			Mongo.get_collections(db, retrieve_subdomain(request),
-				function(err, collections){
-
-					response.send(collections);
+						);
+					},
+					Mongo.update_internal_url,
+				],
+				function(err, final_url, id){
+					if(err){
+						console.error(err);
+						response.statusCode = 503;
+						response.send('Internal Server Error')
+					}else{
+						response.statusCode = 201;
+						response.header('Location', final_url);
+				    	response.send({"id": id});
+					}
 				}
 			);
-		}else{
-			db.collection(request.collection, function(err, collection) {
-				if(request.route.params[0].indexOf('__resources')>0){
-					var internal_parent_url = request.route.params[0].replace('/__resources', '')
-					collection.distinct('_internal_parent_resource', {
-						'_internal_parent_url': {$regex : '^'+internal_parent_url+'/[^\/]+$'}
-					}, function(error, resources){
-						response.send(_.map(resources, function(resource){ return {'name': resource}}));
-					});
-				}else{
-					collection.findOne({'_internal_url': request.route.params[0]}, {}, 
-						function(error, result) {
-							if(result){
-								clear_response(result);
-								response.send(result);
-							}else{
-								var filters = prepare_db_filters(request.query);
-								filters['_internal_parent_url'] = request.route.params[0];
-								collection.find(filters, {}, function(error, cursor){
-									cursor.toArray(function(err, items) {
-										var to_return = [];
-										if(items === null || items.length === 0){
-											if(request.query._default){
-												to_return = request.query._default;
-											}
-											response.send(to_return);
-										}else{
-											for(var i in items){
-												clear_response(items[i]);
-												to_return.push(items[i]);
-											}
-											response.send(to_return);
-										}
-									});
-								});
-							}
-						}
-					);
+		});
+		
+		var prepare_db_filters = function(query_string){
+			var filters = _.clone(query_string);
+			if(filters.id){
+				filters['_id'] = new mongodb.BSONPure.ObjectID(query_params.id);
+				delete filters['id'];
+			}
+			// Search for numbers as string and integer
+			for(var key in filters){
+				if(!isNaN(parseInt(filters[key], 10))){
+					filters[key] = {'$in': [filters[key], parseInt(filters[key], 10)]};
 				}
-			});
+			}
+			return filters;
 		}
-	});
-	app.delete('/*', function(request, response){
-		db.collection(request.collection, function(err, collection) {
-			if(request.query._remove == 'all'){
-				query = {$regex : '^'+request.route.params[0]}
+		
+		app.get('/*', function(request, response){
+			if(request.route.params[0] == '__resources'){
+				Mongo.get_collections(db, retrieve_subdomain(request),
+					function(err, collections){
+
+						response.send(collections);
+					}
+				);
+			}else{
+				db.collection(request.collection, function(err, collection) {
+					if(request.route.params[0].indexOf('__resources')>0){
+						var internal_parent_url = request.route.params[0].replace('/__resources', '')
+						collection.distinct('_internal_parent_resource', {
+							'_internal_parent_url': {$regex : '^'+internal_parent_url+'/[^\/]+$'}
+						}, function(error, resources){
+							response.send(_.map(resources, function(resource){ return {'name': resource}}));
+						});
+					}else{
+						collection.findOne({'_internal_url': request.route.params[0]}, {}, 
+							function(error, result) {
+								if(result){
+									clear_response(result);
+									response.send(result);
+								}else{
+									var filters = prepare_db_filters(request.query);
+									filters['_internal_parent_url'] = request.route.params[0];
+
+									var _sort_by = "_id";
+									var _sort_type = "desc";
+									if(request.query._sort_by){
+										_sort_by = request.query._sort_by;
+										delete filters['_sort_by']
+									}
+									if(request.query._sort_type){
+										_sort_type = request.query._sort_type;
+										delete filters['_sort_type']
+									}
+									if(request.query._select_distinct){
+										delete filters['_select_distinct'];
+										collection.distinct(request.query._select_distinct, filters, function(error, items){
+											response.send(_.map(items, function(item){
+												var response_item = {};
+												response_item[request.query._select_distinct] = item;
+												return response_item;
+											}));
+										});
+									}else{
+										collection.find(filters, {}, function(error, cursor){
+
+											cursor.sort([[_sort_by, _sort_type]]).toArray(function(err, items) {
+												var to_return = [];
+												if(items === null || items.length === 0){
+													if(request.query._default){
+														to_return = request.query._default;
+													}
+													response.send(to_return);
+												}else{
+													for(var i in items){
+														clear_response(items[i]);
+														to_return.push(items[i]);
+													}
+													response.send(to_return);
+												}
+											});
+										});
+									}
+								}
+							}
+						);
+					}
+				});
 			}
-			else{
-				query = request.route.params[0]
-			}
-			collection.remove({'_internal_url': query}, {}, function(error, result) {
-				if(result){
-					response.statusCode = 204;
-					response.send();
-				}else{
-					response.statusCode = 404;
-					response.send();
+		});
+		app.delete('/*', function(request, response){
+			db.collection(request.collection, function(err, collection) {
+				if(request.query._remove == 'all'){
+					query = {$regex : '^'+request.route.params[0]}
 				}
+				else{
+					query = request.route.params[0]
+				}
+				collection.remove({'_internal_url': query}, {}, function(error, result) {
+					if(result){
+						response.statusCode = 204;
+						response.send();
+					}else{
+						response.statusCode = 404;
+						response.send();
+					}
+				});
 			});
 		});
-	});
-	
-	app.put('/*', function(request, response){
-		var found_resource = false;
 		
-		var splited_url = request.route.params[0].split('/')
-		var resource_id = splited_url[splited_url.length -1]
-		
-		if(request.body['id']){
-			delete request.body['id'];
-		}
-		async.waterfall(
-			[
-				async.apply(Mongo.get_collection, db, request.collection),
-				function(collection, callback){
-					collection.findOne(
-						{'_internal_url': request.route.params[0]}, {},
-						function(error, resource) {
-							if(resource){
-								found_resource = true;
-								request.body['_id'] = resource['_id'];
-								collection.update(
-									{'_internal_url': request.route.params[0]},
-									request.body,
-									function(error, result) {
-										callback(
-											error,
-											resource['_internal_url'],
-											resource['_id'],
-											collection
-										);
-									}
-								)
-							}else{
-								Mongo.insert(
-									collection, request.body, function(err, inserted_docs){
-										callback(
-											error,
-											request.route.params[0],
-											inserted_docs[0]['_id'],
-											collection
-										);
-									}
-								);
-							}
-						}
-					);
-				},
-				Mongo.update_internal_url,
-			],
-			function(err, final_url, id){
-				if(err){
-					console.error(err);
-					response.statusCode = 503;
-					response.send('Internal Server Error')
-				}else if(found_resource){
-					response.statusCode = 204;
-					response.send();
-				} else{
-					response.statusCode = 201;
-					response.header('Location', final_url);
-			    	response.send({"id": id});
-				}
+		app.put('/*', function(request, response){
+			var found_resource = false;
+			
+			var splited_url = request.route.params[0].split('/')
+			var resource_id = splited_url[splited_url.length -1]
+			
+			if(request.body['id']){
+				delete request.body['id'];
 			}
-		);
-	});
+			async.waterfall(
+				[
+					async.apply(Mongo.get_collection, db, request.collection),
+					function(collection, callback){
+						collection.findOne(
+							{'_internal_url': request.route.params[0]}, {},
+							function(error, resource) {
+								if(resource){
+									found_resource = true;
+									request.body['_id'] = resource['_id'];
+									collection.update(
+										{'_internal_url': request.route.params[0]},
+										request.body,
+										function(error, result) {
+											callback(
+												error,
+												resource['_internal_url'],
+												resource['_id'],
+												collection
+											);
+										}
+									)
+								}else{
+									Mongo.insert(
+										collection, request.body, function(err, inserted_docs){
+											callback(
+												error,
+												request.route.params[0],
+												inserted_docs[0]['_id'],
+												collection
+											);
+										}
+									);
+								}
+							}
+						);
+					},
+					Mongo.update_internal_url,
+				],
+				function(err, final_url, id){
+					if(err){
+						console.error(err);
+						response.statusCode = 503;
+						response.send('Internal Server Error')
+					}else if(found_resource){
+						response.statusCode = 204;
+						response.send();
+					} else{
+						response.statusCode = 201;
+						response.header('Location', final_url);
+				    	response.send({"id": id});
+					}
+				}
+			);
+		});
+	}else{
+		console.error("ERROR: Couldn't open mongodb connection");
+	}
 });
 
 if (!module.parent){
