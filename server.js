@@ -67,6 +67,17 @@ var set_cors = function(response){
 }
 
 
+get_prefix_interal_url = function(prefix){
+	if(prefix && prefix[prefix.length-1] == '/'){
+		prefix = prefix.substring(0,[prefix.length-1]);
+	}
+	return prefix;
+};
+
+create_internal_url = function(prefix, id){
+	return get_prefix_interal_url(prefix)+'/'+id;
+}
+
 var app = module.exports = express.createServer();
 configure_app(app);
 
@@ -86,8 +97,8 @@ var Mongo = {
         	{
 				"$set": {
 					'_internal_url': final_url,
-					'_internal_parent_url': parent_url,
-					'_internal_parent_resource': resource,
+					'_internal_parent_url': get_prefix_interal_url(parent_url),
+					'_internal_parent_resource': get_prefix_interal_url(resource),
 					'id': resource_id,
 				}
 			},
@@ -137,7 +148,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 								if(request.body.id){
 									id = request.body.id;
 								}
-								_internal_url = request.route.params[0]+"/"+id;
+								_internal_url = create_internal_url(request.route.params[0], id);
 								callback(err, _internal_url, _id, collection);
 							}
 						);
@@ -198,7 +209,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 									response.send(result);
 								}else{
 									var filters = prepare_db_filters(request.query);
-									filters['_internal_parent_url'] = request.route.params[0];
+									filters['_internal_parent_url'] = get_prefix_interal_url(request.route.params[0]);
 
 									var _sort_by = "_id";
 									var _sort_type = "desc";
@@ -254,6 +265,7 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				else{
 					query = request.route.params[0]
 				}
+				console.log(query)
 				collection.remove({'_internal_url': query}, {}, function(error, result) {
 					if(result){
 						response.statusCode = 204;
