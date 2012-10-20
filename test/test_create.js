@@ -119,3 +119,27 @@ describe('New resources when POST to /<resources> with id', function(){
 		});
 	});
 });
+
+describe('Try to create invalid resource /<resources>', function(){
+	before(function(done){
+		self = this;
+		request.post(
+			{
+				url: utils.absolute_url('/movies'),
+				headers: {'Content-Type': 'application/json'},
+				body: '"id": "super_id", "name": "matrix", "year": 1999}'
+			}, 
+			function (err, response, body){
+				self.create_response = response;
+				done();
+			}
+		);
+	});
+	after(function(done){
+ 		require('./tear_down')(done);
+	});
+   	it('should return 400 after trying to create', function(done){
+		assert.equal(400, self.create_response.statusCode);
+		done();
+	});
+});

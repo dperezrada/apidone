@@ -3,10 +3,19 @@ var mongodb = require('mongodb');
 var async = require('async');
 var _ = require('underscore');
 
+function formatErrorHandler(err, req, res, next) {
+	if(err && err.type == "unexpected_token"){
+		res.send(400, { error: 'Bad request: Invalid JSON' });
+	} else {
+		next(err);
+	}
+}
+
 var configure_app = function(app){
 	app.configure(function(){
-	  app.use(express.bodyParser());
-	  app.use(app.router);
+		app.use(express.bodyParser());
+		app.use(app.router);
+		app.use(formatErrorHandler);
 	});
 
 	app.configure('development', function(){
@@ -129,7 +138,9 @@ var Mongo = {
 };
 
 mongodb.connect(create_mongodb_url(), function(err, db){
-	if(!err){
+	if(err){
+		console.error("ERROR: Couldn't open mongodb connection");
+	}else{
 		app.all('/*', function(request, response, next) {
 			request.collection = retrieve_collection(request);
 			set_cors(response);
@@ -265,7 +276,6 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				else{
 					query = request.route.params[0]
 				}
-				console.log(query)
 				collection.remove({'_internal_url': query}, {}, function(error, result) {
 					if(result){
 						response.statusCode = 204;
@@ -342,8 +352,6 @@ mongodb.connect(create_mongodb_url(), function(err, db){
 				}
 			);
 		});
-	}else{
-		console.error("ERROR: Couldn't open mongodb connection");
 	}
 });
 
