@@ -1,14 +1,17 @@
 {
-    "name": "apidone"
-  , "version": "0.1.0"
-  , "private": true
-  , "dependencies": {
-      "express": "2.5.9"
-    , "mongodb": "latest"
-	, "mocha": ">= 0.0.1"
-	, "request": ">= 0.0.1"
-	, "underscore": ">= 0.0.1"
-	, "async": ">= 0.0.1"
-    , "zlib": ">= 0.0.1"
+  "name": "apidone",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "express": "latest",
+    "mongodb": "latest",
+    "mocha": "latest",
+    "request": "latest",
+    "underscore": "latest",
+    "async": "latest",
+    "zlib": "latest"
+  },
+  "directories": {
+    "lib": "./lib"
   }
 }
