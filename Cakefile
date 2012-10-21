@@ -1,6 +1,8 @@
 fs     = require 'fs'
 {exec} = require 'child_process'
 util   = require 'util'
+uglify = require 'uglify-js'
+
 
 prodSrcCoffeeDir     = 'src'
 # testSrcCoffeeDir     = 'test/src/coffee-script'
@@ -9,9 +11,10 @@ prodTargetJsDir      = 'lib'
 # testTargetJsDir      = 'test/src/js'
 
 prodTargetFileName   = 'server'
-prodTmpDirCoffee = "#{prodSrcCoffeeDir}/tmp"
+prodTmpDirCoffee     = "#{prodSrcCoffeeDir}/tmp"
 prodTargetCoffeeFile = "#{prodTmpDirCoffee}/#{prodTargetFileName}.coffee"
 prodTargetJsFile     = "#{prodTargetJsDir}/#{prodTargetFileName}.js"
+prodTargetJsMinFile  = "#{prodTargetJsDir}/#{prodTargetFileName}.min.js"
 
 prodCoffeeOpts = "--bare --output #{prodTargetJsDir} --compile #{prodTmpDirCoffee}"
 # testCoffeeOpts = "--output #{testTargetJsDir}"
@@ -57,7 +60,24 @@ task 'build', 'Build a single JavaScript file from prod files', ->
                     displayNotification message
                     fs.unlink prodTargetCoffeeFile, (err) -> handleError(err) if err
                     fs.rmdir prodTmpDirCoffee
-                    invoke 'uglify'
+                    # invoke 'uglify'
+
+task 'uglify', 'Minify and obfuscate', ->
+    jsp = uglify.parser
+    pro = uglify.uglify
+
+    fs.readFile prodTargetJsFile, 'utf8', (err, fileContents) ->
+        ast = jsp.parse fileContents  # parse code and get the initial AST
+        ast = pro.ast_mangle ast # get a new AST with mangled names
+        ast = pro.ast_squeeze ast # get an AST with compression optimizations
+        final_code = pro.gen_code ast # compressed code here
+    
+        fs.writeFile prodTargetJsMinFile, final_code
+        fs.unlink prodTargetJsFile, (err) -> handleError(err) if err
+        
+        message = "Uglified #{prodTargetJsMinFile}"
+        util.log message
+        displayNotification message
 
 handleError = (error) -> 
     util.log error

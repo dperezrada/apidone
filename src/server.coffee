@@ -1,24 +1,19 @@
-formatErrorHandler = (err, req, res, next) ->
-  if err and err.type is "unexpected_token"
-    res.send 400,
-      error: "Bad request: Invalid JSON"
-
-  else
-    next err
 express = require("express")
-mongodb = require("mongodb")
 async = require("async")
 _ = require("underscore")
+
+mongodb = require("mongodb")
 Server = mongodb.Server
 Db = mongodb.Db
 BSON = mongodb.BSONPure
+
 MONGODB_HOST = process.env.MONGODB_HOST or "localhost"
 MONGODB_PORT = parseInt process.env.MONGODB_PORT or 27017
 MONGODB_DBNAME = process.env.MONGODB_DBNAME or "apidone_dev"
-server = new Server(MONGODB_HOST, MONGODB_PORT,
-  auto_reconnect: true
-)
+
+server = new Server(MONGODB_HOST, MONGODB_PORT, auto_reconnect: true)
 db = new Db(MONGODB_DBNAME, server, safe: true)
+
 db.open (err, data) ->
   db_connected = false
   unless err
@@ -27,14 +22,20 @@ db.open (err, data) ->
         unless err2
           db_connected = true
         else
-          console.log "Error: Invalid database user or password"
-
+          console.error "Error: Invalid database user or password"
     else
       db_connected = true
   if db_connected
     console.log "Connected to '" + MONGODB_DBNAME + "' database"
   else
-    console.log "Error: Problem connecting to database"
+    console.error "Error: Problem connecting to database"
+
+formatErrorHandler = (err, req, res, next) ->
+  if err and err.type is "unexpected_token"
+    res.send 400,
+      error: "Bad request: Invalid JSON"
+  else
+    next err
 
 configure_app = (app) ->
   app.configure ->
@@ -55,11 +56,8 @@ configure_app = (app) ->
 clear_response = (response_el) ->
   response_el["id"] = "" + response_el["_id"]  unless response_el["id"]
   delete response_el["_id"]
-
   delete response_el["_internal_url"]
-
   delete response_el["_internal_parent_url"]
-
   delete response_el["_internal_parent_resource"]
 
 get_prefix_interal_url = (prefix) ->
@@ -71,6 +69,7 @@ create_internal_url = (prefix, id) ->
 
 app = module.exports = express()
 configure_app app
+
 Mongo =
   get_collection: (db, name, callback) ->
     db.collection name, callback
