@@ -1,4 +1,4 @@
-module.exports = (request, response) ->
+app.post "/*", (request, response) ->
   async.waterfall [async.apply(Mongo.get_collection, db, request.collection), (collection, callback) ->
     Mongo.insert collection, request.body, (err, inserted_docs) ->
       _id = inserted_docs[0]["_id"]

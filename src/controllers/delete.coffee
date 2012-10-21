@@ -1,4 +1,4 @@
-module.exports = (request, response) ->
+app.delete "/*", (request, response) ->
   db.collection request.collection, (err, collection) ->
     if request.query._remove is "all"
       query = $regex: "^" + request.route.params[0]

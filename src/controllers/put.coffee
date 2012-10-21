@@ -1,4 +1,4 @@
-module.exports = (request, response) ->
+app.put "/*",  (request, response) ->
   found_resource = false
   splited_url = request.route.params[0].split("/")
   resource_id = splited_url[splited_url.length - 1]

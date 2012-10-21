@@ -37,7 +37,11 @@ describe('List all resources', function(){
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
 	it('should receive all the existing resources on GET /__resources ', function(done){
 		assert.deepEqual(self.resources_list, [{name: 'countries'}, {name: 'movies'}]);

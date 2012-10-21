@@ -19,7 +19,7 @@ export APIDONE_DEFAULT_SUBDOMAIN=test
 
 mkdir -p logs
 echo "Starting the server"
-nohup node server.js test_apidone > logs/server.log &
+nohup node lib/server.js test_apidone > logs/server.log &
 sleep 2;
 
 echo "Running tests"

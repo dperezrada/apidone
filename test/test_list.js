@@ -38,7 +38,11 @@ describe('List resources', function(){
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
 	describe('List resources by doing GET to /<resources>', function(){
 		it('should get the list of movies', function(done){
