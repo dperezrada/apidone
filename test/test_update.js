@@ -35,7 +35,11 @@ describe('Replace resource by sending PUT to /<resources>/:resource_id', functio
 		})
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
    	it('should return 204 after updating a resource', function(done){
 		assert.equal(204, self.update_response.statusCode);

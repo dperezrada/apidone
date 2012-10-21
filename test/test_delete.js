@@ -37,7 +37,11 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id', f
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
 	it('should return 204 as status code', function(done){
 		assert.equal(204, self.delete_response.statusCode);
@@ -78,7 +82,11 @@ describe('Delete all new resource by sending DELETE to /<resources>', function()
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
 	it('should return 204 as status code', function(done){
 		assert.equal(204, self.delete_response.statusCode);
@@ -119,7 +127,11 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id whe
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
 	it('should return 204 as status code', function(done){
 		assert.equal(204, self.delete_response.statusCode);
