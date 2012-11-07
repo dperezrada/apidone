@@ -9,7 +9,7 @@ $(document).ready(function(){
 
 	// Models
 	App.Models.Account = Backbone.Model.extend({
-		'urlRoot': 'http://localhost:3000/accounts'
+		'urlRoot': 'http://api.apidone.com/accounts'
 	});
 
 	App.Views.Register = Backbone.View.extend({
@@ -49,7 +49,6 @@ $(document).ready(function(){
 				complete: function(xhr, response_status){
 					var json = JSON.parse(xhr.responseText);
 					error = "";
-					console.log("hola");
 					a = xhr;
 					if(xhr.status == 201){
 						var template = _.template($('#tpl-success').html());
@@ -67,20 +66,27 @@ $(document).ready(function(){
 			$(this.el).html(_.template($('#tpl-loading').html()));
 		},
 		check_subdomain: function(e){
-			$.ajax({
-			  url: 'http://localhost:3000/subdomains',
-			  type: 'POST',
-			  dataType: 'json',
-			  data: {subdomain: $(e.target).val()},
-			  complete: function(xhr, textStatus) {
-			    var json = JSON.parse(xhr.responseText);
-			    var color = "red"
-			    if(json.status == "Available"){
-			    	color = "green";
-			    }
-				$(".status_subdomain").text(json.status).css("color", color);;
-			  }
-			});
+			var subdomain = $(e.target).val();
+			if(subdomain.length<6){
+				$(".status_subdomain").text("Must have length of 6 or more").css("color", "red");;
+			}else{
+				$(".status_subdomain").text("");
+				$.ajax({
+				  url: 'http://api.apidone.com/subdomains',
+				  type: 'POST',
+				  dataType: 'json',
+				  data: {subdomain: subdomain},
+				  complete: function(xhr, textStatus) {
+				    var json = JSON.parse(xhr.responseText);
+				    var color = "red"
+				    if(json.status == "Available"){
+				    	color = "green";
+				    }
+				    a = json;
+					$(".status_subdomain").text(json.status).css("color", color);
+				  }
+				});
+			}
 			
 		}
 	});
