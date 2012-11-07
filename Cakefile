@@ -1,42 +1,56 @@
 fs     = require 'fs'
 {exec} = require 'child_process'
 util   = require 'util'
-uglify = require 'uglify-js'
+# uglify = require 'uglify-js'
 
-
-prodSrcCoffeeDir     = 'src'
-# testSrcCoffeeDir     = 'test/src/coffee-script'
-
+prodSrcCoffeeDir     = "src"
 prodTargetJsDir      = 'lib'
-# testTargetJsDir      = 'test/src/js'
 
-prodTargetFileName   = 'server'
-prodTmpDirCoffee     = "#{prodSrcCoffeeDir}/tmp"
-prodTargetCoffeeFile = "#{prodTmpDirCoffee}/#{prodTargetFileName}.coffee"
-prodTargetJsFile     = "#{prodTargetJsDir}/#{prodTargetFileName}.js"
-prodTargetJsMinFile  = "#{prodTargetJsDir}/#{prodTargetFileName}.min.js"
+prodCoffeeOpts = null
+prodTargetFileName = null
+prodTmpDirCoffee = null
+prodTargetCoffeeFile = null
+prodTargetJsFile = null
+prodTargetJsMinFile = null
 
-prodCoffeeOpts = "--bare --output #{prodTargetJsDir} --compile #{prodTmpDirCoffee}"
+setup_global = (target) ->
+    prodTargetFileName   = target
+    prodTmpDirCoffee     = "#{prodSrcCoffeeDir}/tmp"
+    prodTargetCoffeeFile = "#{prodTmpDirCoffee}/#{prodTargetFileName}.coffee"
+    prodTargetJsFile     = "#{prodTargetJsDir}/#{prodTargetFileName}.js"
+    prodTargetJsMinFile  = "#{prodTargetJsDir}/#{prodTargetFileName}.min.js"
+    prodCoffeeOpts = "--bare --output #{prodTargetJsDir} --compile #{prodTmpDirCoffee}"
 # testCoffeeOpts = "--output #{testTargetJsDir}"
 
-prodCoffeeFiles = [
-    'server'
-    'controllers/all'
-    'controllers/get'
-    'controllers/post'
-    'controllers/put'
-    'controllers/delete'
-    'server_start'
+prodCoffeeFiles = {
+    'main': [
+        'main/server'
+        'main/libs/db'
+        'main/libs/utils'
+        'main/controllers/all'
+        'main/controllers/get'
+        'main/controllers/post'
+        'main/controllers/put'
+        'main/controllers/delete'
+        'main/server_start'
+    ],
+    'admin': [
+        'main/server'
+        'main/libs/db'
+        'admin/controllers/accounts'
+        'main/server_start'
+    ]
+}
 
-]
-
-task 'build', 'Build a single JavaScript file from prod files', ->
+option '-a', '--application [NAME]', 'application name'
+task 'build', 'Build a single JavaScript file from prod files', (options)->
+    setup_global options.application
     fs.mkdir prodTmpDirCoffee, ->
         util.log "Building #{prodTargetJsFile}"
-        appContents = new Array remaining = prodCoffeeFiles.length
-        util.log "Appending #{prodCoffeeFiles.length} files to #{prodTmpDirCoffee}/#{prodTargetFileName}.js"
+        appContents = new Array remaining = prodCoffeeFiles[prodTargetFileName].length
+        util.log "Appending #{prodCoffeeFiles[prodTargetFileName].length} files to #{prodTmpDirCoffee}/#{prodTargetFileName}.js"
         
-        for file, index in prodCoffeeFiles then do (file, index) ->
+        for file, index in prodCoffeeFiles[prodTargetFileName] then do (file, index) ->
             fs.readFile "#{prodSrcCoffeeDir}/#{file}.coffee"
                       , 'utf8'
                       , (err, fileContents) ->
