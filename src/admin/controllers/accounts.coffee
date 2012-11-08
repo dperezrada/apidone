@@ -55,7 +55,7 @@ app.post "/accounts", (request, response) ->
 								shasum.update(SALT + request.body.pass);
 								request.body.pass = shasum.digest('hex');
 								request.body['subdomains'] = [request.body.subdomain]
-								delete [request.body.subdomain]
+								delete request.body['subdomain']
 								Mongo.insert collection, request.body, (err, inserted_account) ->
 									callback err, request.body.subdomain
 							else
