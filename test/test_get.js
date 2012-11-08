@@ -36,7 +36,11 @@ describe('Get new resource when GET to /<resources>/:resource_id', function(){
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
 	it('should get the correct movie', function(done){
 		assert.deepEqual({
@@ -65,7 +69,11 @@ describe('Get new resource when GET to /<resources>/:resource_id created with id
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(done);
+		utils.get_connection(
+			function(err, db){
+				require('./tear_down')(db, done);
+			}
+		);
 	});
 	it('should get the correct movie', function(done){
 		assert.deepEqual({
