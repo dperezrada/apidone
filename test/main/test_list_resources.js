@@ -1,7 +1,7 @@
 var request = require('request')
 	, assert = require('assert');
 var async = require('async');
-var utils = require('./utils');
+var utils = require('../libs/utils');
 var self;
 
 var create_resource = function(name, data, callback){
@@ -39,7 +39,7 @@ describe('List all resources', function(){
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});

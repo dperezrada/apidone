@@ -19,13 +19,21 @@ export APIDONE_DEFAULT_SUBDOMAIN=test
 
 mkdir -p logs
 echo "Starting the server"
-nohup node lib/server.js test_apidone > logs/server.log &
+nohup node lib/main.js test_apidone > logs/server.log &
+export APIDONE_PORT_ADMIN=3002
+export APIDONE_PORT=3002
+nohup node lib/admin.js test_apidone_admin > logs/admin_server.log &
+export APIDONE_PORT=3001
 sleep 2;
 
 echo "Running tests"
-./node_modules/.bin/mocha -b;
+./node_modules/.bin/mocha -b test/admin test/main;
 
-PROCESS_ID=`ps -ef | grep "node" | grep "test_api" | grep -v "grep" | awk '{print $2}'`;
+PROCESS_ID=`ps -ef | grep "node" | grep "test_apidone_admin" | grep -v "grep" | awk '{print $2}'`;
+echo "Stopping admin server, process_id: $PROCESS_ID"
+kill $PROCESS_ID;
+
+PROCESS_ID=`ps -ef | grep "node" | grep "test_apidone" | grep -v "grep" | awk '{print $2}'`;
 echo "Stopping server, process_id: $PROCESS_ID"
 kill $PROCESS_ID;
 

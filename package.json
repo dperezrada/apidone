@@ -9,7 +9,8 @@
     "request": "latest",
     "underscore": "latest",
     "async": "latest",
-    "zlib": "latest"
+    "zlib": "latest",
+    "jade": "latest"
   },
   "directories": {
     "lib": "./lib"

@@ -1,7 +1,7 @@
 var request = require('request')
 	, assert = require('assert')
 	, async = require('async')
-	, utils = require('./utils');
+	, utils = require('../libs/utils');
 
 var self;
 
@@ -37,7 +37,7 @@ describe('Replace resource by sending PUT to /<resources>/:resource_id', functio
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});

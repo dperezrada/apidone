@@ -1,5 +1,9 @@
-exports.absolute_url = function(resource_url){
-	return 'http://'+process.env.APIDONE_HOST+':'+process.env.APIDONE_PORT+resource_url;	
+exports.absolute_url = function(resource_url, admin){
+	var port = process.env.APIDONE_PORT;
+	if(admin){
+		var port = process.env.APIDONE_PORT_ADMIN;
+	}
+	return 'http://'+process.env.APIDONE_HOST+':'+port+resource_url;	
 }
 
 var mongodb = require('mongodb');

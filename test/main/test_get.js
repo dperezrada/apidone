@@ -1,7 +1,7 @@
 var request = require('request')
 	, assert = require('assert');
 var async = require('async');
-var utils = require('./utils');
+var utils = require('../libs/utils');
 var self;
 
 var create_movie = function(json, callback){
@@ -38,7 +38,7 @@ describe('Get new resource when GET to /<resources>/:resource_id', function(){
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});
@@ -71,7 +71,7 @@ describe('Get new resource when GET to /<resources>/:resource_id created with id
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});

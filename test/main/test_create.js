@@ -1,6 +1,6 @@
 var request = require('request')
 	, assert = require('assert')
-	, utils = require('./utils')
+	, utils = require('../libs/utils')
 	, mongodb = require('mongodb');
 
 var self;
@@ -20,7 +20,7 @@ describe('New resources when POST to /<resources>', function(){
 		);
 	});
 	after(function(done){
-		require('./tear_down')(self.db, done);
+		require('../libs/tear_down')(self.db, done);
 	});
    	it('should return 201 after creating a new resource', function(done){
 		assert.equal(201, self.create_response.statusCode);
@@ -63,7 +63,7 @@ describe('New resources when PUT to /<resources>/:id', function(){
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(self.db, done);
+ 		require('../libs/tear_down')(self.db, done);
 	});
    	it('should return 201 after creating a new resource', function(done){
 		assert.equal(201, self.create_response.statusCode);
@@ -107,7 +107,7 @@ describe('New resources when POST to /<resources> with id', function(){
 		);
 	});
 	after(function(done){
- 		require('./tear_down')(self.db, done);
+ 		require('../libs/tear_down')(self.db, done);
 	});
    	it('should return 201 after creating a new resource', function(done){
 		assert.equal(201, self.create_response.statusCode);
@@ -145,7 +145,7 @@ describe('Try to create invalid resource /<resources>', function(){
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});

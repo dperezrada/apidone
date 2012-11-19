@@ -1,7 +1,7 @@
 var request = require('request')
 	, assert = require('assert');
 var async = require('async');
-var utils = require('./utils');
+var utils = require('../libs/utils');
 var self;
 
 var create_movie = function(movie_json, resources_url, callback){
@@ -39,7 +39,7 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id', f
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});
@@ -84,7 +84,7 @@ describe('Delete all new resource by sending DELETE to /<resources>', function()
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});
@@ -129,7 +129,7 @@ describe('Delete new resource by sending DELETE to /<resources>/:resource_id whe
 	after(function(done){
 		utils.get_connection(
 			function(err, db){
-				require('./tear_down')(db, done);
+				require('../libs/tear_down')(db, done);
 			}
 		);
 	});

@@ -12,6 +12,7 @@ formatErrorHandler = (err, req, res, next) ->
 configure_app = (app) ->
   app.configure ->
     app.use express.bodyParser()
+    app.use express.cookieParser()
     app.use app.router
     app.use formatErrorHandler
 
