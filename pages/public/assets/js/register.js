@@ -9,7 +9,7 @@ $(document).ready(function(){
 
 	// Models
 	App.Models.Account = Backbone.Model.extend({
-		'urlRoot': 'http://api.apidone.com/accounts'
+		'urlRoot': BASE_URL+'/accounts'
 	});
 
 	App.Views.Register = Backbone.View.extend({
@@ -72,7 +72,7 @@ $(document).ready(function(){
 			}else{
 				$(".status_subdomain").text("");
 				$.ajax({
-				  url: 'http://api.apidone.com/subdomains',
+				  url: BASE_URL+'/subdomains',
 				  type: 'POST',
 				  dataType: 'json',
 				  data: {subdomain: subdomain},

@@ -8,8 +8,6 @@ set_cors = (response) ->
 
 app.all "/*", (request, response, next) ->
 	as_cookie = request.cookies.as
-	console.log(request.originalUrl)
-	console.log(as_cookie)
 	request.account = null
 	if as_cookie
 		Mongo.get_collection db, 'accounts', (err, collection) ->
@@ -79,7 +77,7 @@ app.post "/accounts", (request, response) ->
 								request.body['sessions'] = []
 								delete request.body['subdomain']
 								Mongo.insert collection, request.body, (err, inserted_account) ->
-									callback err, request.body.subdomain
+									callback err, request.body['subdomains'][0]
 							else
 								callback {'code': 409, 'err': 'You have to choose another subdomain.'}, null
 			else

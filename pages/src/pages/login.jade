@@ -1,0 +1,22 @@
+extends ../base
+
+block vars
+  - var title='APIdone - Login'
+
+block content
+  div.hero-unit.text-centered.main
+    h2 APIdone
+    h3 Login
+  div.content-bottom
+    form.form-horizontal.register-form
+      div.control-group
+        label(class="control-label", for="inputEmail") Email
+        div.controls
+          input(type="text", id="inputEmail", placeholder="Email")
+      div.control-group
+        label(class="control-label", for="inputPassword") Password
+        div.controls
+          input(type="password", id="inputPassword", placeholder="Password")
+      div.control-group
+        div.controls
+          button#register-button.btn Register
