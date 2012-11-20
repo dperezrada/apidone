@@ -3,4 +3,10 @@ npm install -d
 npm update
 
 #Run test
-./run_test.sh
+cake -a "admin" build; cake -a "admin" build; ./run_test.sh
+
+#Generate pages
+jade -w ../src/pages/*.jade --out ../public/
+
+#Start admin server
+cake -a "admin" build; cake -a "admin" build; ./start_dev.sh

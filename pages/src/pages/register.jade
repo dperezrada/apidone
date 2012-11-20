@@ -1,0 +1,58 @@
+extends ../base
+
+block vars
+  - var title='APIdone'
+
+block scripts
+  script(src="assets/js/register.js")
+
+block content
+  script(type="text/template", id="tpl-loading")
+    div.loading-container
+      img(src="assets/img/loading.gif")
+
+  script(type="text/template", id="tpl-success")
+    div.text-centered.main
+      h4 You are ready to use your account:
+      h3 Your APIdone url is:
+      code.your_subdomain http://<%= subdomain %>.apidone.com
+      h5 Take a look to the <a href="docs.html">documentation</a>
+
+  div.hero-unit.text-centered.main
+    h1 APIdone
+    h2 Register to start using
+  div#register
+
+  script(type="text/template", id="tpl-register")
+    form.form-horizontal.register-form.
+      <% if(err){ %>
+        <div class="label label-warning"><%= err %></div>
+      <% } %>
+        <div class="control-group">
+          <label class="control-label" for="inputSubdomain">Subdomain</label>
+          <div class="controls">
+            <div class="input-append">
+              <span class="add-on">http://</span>
+              <input class="" id="inputSubdomain" type="text" value="<%= subdomain %>">
+              <span class="add-on">.apidone.com</span>
+              <span class="status_subdomain"></span>
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="inputEmail">Email</label>
+          <div class="controls">
+            <input type="text" id="inputEmail" placeholder="Email" value="<%= email %>">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="inputEmail">Password</label>
+          <div class="controls">
+            <input type="password" id="inputPassword" placeholder="Password" value="<%= pass %>">
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button id="register-button" class="btn">Register</button>
+          </div>
+        </div>
