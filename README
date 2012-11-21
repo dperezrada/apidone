@@ -10,3 +10,9 @@ jade -w ../src/pages/*.jade --out ../public/
 
 #Start admin server
 cake -a "admin" build; cake -a "admin" build; ./start_dev.sh
+
+#Prepare server for the first time
+fab api ubuntu fresh_install
+
+#Deploy version v0.2.5b
+fab api deploy:'v0.2.5b'

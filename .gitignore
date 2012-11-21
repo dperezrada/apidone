@@ -4,3 +4,4 @@ logs/*
 old
 backup
 cucumber
+*.pyc
