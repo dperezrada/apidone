@@ -18,3 +18,7 @@ app.all "/*", (request, response, next) ->
   request.collection = retrieve_collection(request)
   set_cors response
   next()
+
+app.get "/amazon_lb", (request, response) ->
+  response.statusCode = 200
+  response.send {"status": "OK"}

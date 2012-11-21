@@ -128,3 +128,7 @@ app.post "/login", (request, response) ->
 			response.statusCode = 201
 			response.cookie('as', session, { path: '/', expires: new Date(Date.now() + 60*60*24*31*1000) });
 			response.send {"status": "OK"}
+
+app.get "/amazon_lb", (request, response) ->
+	response.statusCode = 200
+	response.send {"status": "OK"}
