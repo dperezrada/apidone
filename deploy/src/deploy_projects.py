@@ -62,6 +62,8 @@ def remove_permissions():
 
 def generate_pages():
     local("jade ../pages/src/pages/*.jade --out ../pages/public/")
+    local("lessc  ../pages/src/css/main.less > ../pages/public/assets/css/main.css")
+def upload_pages():
     local("s3cmd sync -P ../pages/public/ s3://www.apidone.com")
 
 def deploy(version):
@@ -72,3 +74,4 @@ def deploy(version):
     remove_permissions()
     restart_services()
     generate_pages()
+    upload_pages()
