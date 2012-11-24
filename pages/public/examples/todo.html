@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>APIdone - TODO</title>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        var tasks = {};
+        // Get tasks
+
+        var reload_tasks = function(){
+          $.ajax({
+            url: 'http://demo.apidone.com/tasks',
+            type: 'GET',
+            dataType: 'json',
+            async: false,
+            success: function(data, textStatus, xhr) {
+
+              $("#todo").html("");
+
+              $.each(data, function(index, task) {
+                tasks[task.id] = task;
+
+                var input_task = "<div><input id='"+task.id+"'value='"+task.name+"'/></div>";
+                $("#todo").append(input_task);
+
+                $("#"+task.id).change(
+                });
+
+              });
+
+            }
+          });
+        };
+
+        var update_task = function(){
+          var current_id = this.attr('id');
+          tasks[]
+          $.ajax({
+            url: 'http://demo.apidone.com/tasks/'+this.attr('id'),
+            type: 'PUT',
+            dataType: 'json',
+            data: ,
+            complete: function(xhr, textStatus) {
+              //called when complete
+            },
+            success: function(data, textStatus, xhr) {
+              //called when successful
+            },
+            error: function(xhr, textStatus, errorThrown) {
+              //called when there is an error
+            }
+          });
+        };
+
+        reload_tasks();
+
+        
+      });
+    </script>
+  </head>
+  <body>
+    <div id="todo">
+
+    </div>
+
+  </body>
+</html>
