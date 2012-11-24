@@ -3,19 +3,19 @@ SALT = 'Esto es lo mejor que se me ocurrio como salt'
 
 set_cors = (response) ->
 	response.header "Access-Control-Allow-Origin", "*"
-	response.header "Access-Control-Allow-Headers", "X-Requested-With,Content-Type"
+	response.header "Access-Control-Allow-Headers", "X-Requested-With,Content-Type,Origin,Accept"
 	response.header "Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,DELETE"
 
 app.all "/*", (request, response, next) ->
 	as_cookie = request.cookies.as
 	request.account = null
+	set_cors response
 	if as_cookie
 		Mongo.get_collection db, 'accounts', (err, collection) ->
 			collection.findOne {sessions: as_cookie}, (err, account_exists) ->
 				request.account = account_exists
 				next()
 	else
-		set_cors response
 		next()
 
 app.options "/*", (request, response) ->
@@ -91,8 +91,9 @@ app.post "/accounts", (request, response) ->
 				response.statusCode = 503
 				response.send "Internal Server Error"
 		else
-			response.statusCode = 201
-			response.send id: subdomain
+			send_email request.body.email, "http://#{subdomain}.apidone.com", 'welcome', (err, result)->
+				response.statusCode = 201
+				response.send id: subdomain
 
 app.post "/login", (request, response) ->
 	async.waterfall [

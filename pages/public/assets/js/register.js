@@ -92,5 +92,5 @@ $(document).ready(function(){
 	});
 
 	App.Instances.RegisterView = new App.Views.Register();
-
+	
 });

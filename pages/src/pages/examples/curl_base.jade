@@ -1,0 +1,29 @@
+ul.nav.nav-tabs.examples-specific-tab
+  li.active
+    a(href="#curl-create", data-toggle="tab") Create resource
+  li
+    a(href="#curl-list", data-toggle="tab") List resource
+  li
+    a(href="#curl-create_nested", data-toggle="tab") Create nested resource
+div.tab-content
+  div#curl-create.tab-pane.active
+    h4.example_title Request
+    pre
+      include curl/create.jade
+    h4.example_title Response
+    pre
+      include response/create.jade
+  div#curl-list.tab-pane
+    h4.example_title Request
+    pre
+      include curl/list.jade
+    h4.example_title Response
+    pre
+      include response/list.jade
+  div#curl-create_nested.tab-pane
+    h4.example_title Request
+    pre
+      include curl/create_nested.jade
+    h4.example_title Response
+    pre
+      include response/create_nested.jade
