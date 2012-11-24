@@ -37,6 +37,7 @@ prodCoffeeFiles = {
     'admin': [
         'main/server'
         'main/libs/db'
+        'admin/libs/email'
         'admin/controllers/accounts'
         'main/server_start'
     ]

@@ -3,5 +3,4 @@ export MONGODB_HOST=ds029847.mongolab.com
 export MONGODB_PASSWORD=ykzt0h28se4ao8d82
 export MONGODB_PORT=29847
 export MONGODB_USER=apidone
-export MONGOLAB_URI=mongodb://heroku_app2857150:o5mgb3bm2oahf8hlrflagn8odj@ds029847.mongolab.com:29847/heroku_app2857150
-export APIDONE_PORT=9999
+export APIDONE_PORT=9998

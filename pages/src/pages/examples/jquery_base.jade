@@ -1,0 +1,29 @@
+ul.nav.nav-tabs.examples-specific-tab
+  li.active
+    a(href="#jquery-create", data-toggle="tab") Create resource
+  li
+    a(href="#jquery-list", data-toggle="tab") List resource
+  li
+    a(href="#jquery-create_nested", data-toggle="tab") Create nested resource
+div.tab-content
+  div#jquery-create.tab-pane.active
+    h4.example_title Request
+    pre
+      include jquery/create.jade
+    h4.example_title Response
+    pre
+      include response/create.jade
+  div#jquery-list.tab-pane
+    h4.example_title Request
+    pre
+      include jquery/list.jade
+    h4.example_title Response
+    pre
+      include response/list.jade
+  div#jquery-create_nested.tab-pane
+    h4.example_title Request
+    pre
+      include jquery/create_nested.jade
+    h4.example_title Response
+    pre
+      include response/create_nested.jade

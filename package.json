@@ -10,7 +10,8 @@
     "underscore": "latest",
     "async": "latest",
     "zlib": "latest",
-    "jade": "latest"
+    "jade": "latest",
+    "aws-lib": "latest"
   },
   "directories": {
     "lib": "./lib"

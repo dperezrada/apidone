@@ -10,43 +10,28 @@ block content
     h2 A ready to use backend
     p.text-centered.landing
       | APIdone is a ready to use RESTful API. That will save you the hassle of creating an API, setup a server and install a database.
-    a.btn.btn-primary.btn-large.btn-success.btn-invite(href='register.html') Start (only $19 month)
-    p.no_cc 30 days trial - No Credit card required
-  .hero-unit.text-centered.features
-    h2.text-left Examples
-    .row-fluid.no-border
-      .span6.text-header Input
-      .span6.text-header Output
-    h4.example_title Create Resource
-    .row-fluid
-      .span6
-        | <pre><code class="bash">$ curl -X POST "http://demo.apidone.com/movies" \
-        | -d '{"id": "123", name": "Up", "year": "2009"}' \
-        | -H "Content-Type: application/json"</code></pre>   
-      .span6
-        | <pre><code class="js">Status: 201
-        | body: {"id":"123"}</code></pre>       
-    h4.example_title List Resources
-    .row-fluid
-      .span6
-        | <pre><code class="bash">$ curl -X GET "http://demo.apidone.com/movies"</code></pre>
-      .span6
-        | <pre><code class="js">Status: 200
-        | body: [{"id":"123","name":"Up","year":"2009"}]</code></pre>
-    h4.example_title Create nested resource
-    .row-fluid
-      .span6
-        | <pre><code class="bash">$ curl -X POST \
-        | "http://demo.apidone.com/movies/123/awards" \
-        | -d '{"name": "Oscar", "year": "2010", "total": 2}'</code></pre>
-      .span6
-        | <pre><code class="js">Status: 201
-        | body: {"id":"509176c56768501c0c00018c"}</code></pre>      
-    a.btn.btn-primary.btn-large.btn-success.btn-invite(href='register.html') Start (only $19 month)
-    p.no_cc 30 days trial - No Credit card required
-  .hero-unit.text-centered.examples
+    a.btn.btn-primary.btn-large.btn-success.btn-invite(href='register.html') 30 days Free trial
+    p.no_cc No Credit card required
+  .container
+    .hero-unit.text-centered.examples
+      h2.text-left Examples
+      p.text-left Lalala ls kjsdhas kjd akjsd aksjdhaskjd ajksdahkjsdhaksjdhaksjdahksjda skjhd kajsd aksjd akjshd
+      ul.nav.nav-tabs.examples-tab
+        li.active
+          a(href="#jquery", data-toggle="tab") jQuery
+        li
+          a(href="#curl", data-toggle="tab") Curl
+      div.tab-content
+        div#jquery.code-examples.specific.tab-pane.active
+          include examples/jquery_base
+        div#curl.code-examples.tab-pane
+          include examples/curl_base
+
+      a.btn.btn-primary.btn-large.btn-success.btn-invite(href='register.html') 30 days Free trial
+      p.no_cc No Credit card required
+  .container.text-centered.features
     h2.text-left Features
-    .row.span12
+    .row
       .span4
         .image-holder
           img(src='assets/img/features_save_time.png', alt='Save time', style='border: 0; width: 190px;')
