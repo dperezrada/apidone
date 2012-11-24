@@ -27,6 +27,8 @@ check_subdomain = (collection, subdomain, callback) ->
 			callback err, null
 		else if account and account.subdomain
 			callback null, 'Not Available'
+		else if subdomain.length <10
+			callback null, 'Must have length of 10 or more'
 		else
 			callback null, 'Available'
 
@@ -79,7 +81,7 @@ app.post "/accounts", (request, response) ->
 								Mongo.insert collection, request.body, (err, inserted_account) ->
 									callback err, request.body['subdomains'][0]
 							else
-								callback {'code': 409, 'err': 'You have to choose another subdomain.'}, null
+								callback {'code': 409, 'err': status}, null
 			else
 				callback {'code': 400, 'err': 'You have to fill all the fields.'}, null
 	], (err, subdomain) ->

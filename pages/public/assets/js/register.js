@@ -67,8 +67,8 @@ $(document).ready(function(){
 		},
 		check_subdomain: function(e){
 			var subdomain = $(e.target).val();
-			if(subdomain.length<6){
-				$(".status_subdomain").text("Must have length of 6 or more").css("color", "red");;
+			if(subdomain.length<10){
+				$(".status_subdomain").text("Must have length of 10 or more").css("color", "red");;
 			}else{
 				$(".status_subdomain").text("");
 				$.ajax({

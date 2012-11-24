@@ -15,7 +15,7 @@ describe('Login with new account', function(){
 						json: {
 							email: "testing@hola.com", 
 							pass: "1234",
-							subdomain: "1234567"
+							subdomain: "12345678910"
 						}
 					},
 					function (err, response, body){
@@ -49,7 +49,7 @@ describe('Login with new account', function(){
 					},
 					function (err, response_subdomains, body_subdomains){
 						var json_subdomains = JSON.parse(body_subdomains)
-						assert.deepEqual(["1234567"], json_subdomains)
+						assert.deepEqual(["12345678910"], json_subdomains)
 						done()
 					}
 				)
@@ -69,5 +69,25 @@ describe('Invalid Login with new account', function(){
 				done();
 			}
 		);
+	});
+});
+
+describe('Shouldnt be able to create short subdomain', function(){
+	it('with less than 10 chars', function(done){
+		request.post(
+			{
+				url: utils.absolute_url('/accounts', 'admin'),
+				json: {
+					email: "testing1@hola.com", 
+					pass: "12345",
+					subdomain: "123456789"
+				}
+			},
+			function (err, response, body){
+				assert.equal(409, response.statusCode);
+				assert.equal('Must have length of 10 or more', body.err);
+				done();
+			}
+		)
 	});
 });

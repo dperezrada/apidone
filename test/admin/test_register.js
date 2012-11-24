@@ -21,12 +21,12 @@ describe('Succesfully registered', function(){
 						json: {
 							email: "testing@hola.com", 
 							pass: "1234",
-							subdomain: "1234567"
+							subdomain: "12345678910"
 						}
 					},
 					function (err, response, body){
 						assert.equal(201, response.statusCode);
-						assert.equal("1234567", body.id);
+						assert.equal("12345678910", body.id);
 						done();
 					}
 				);
