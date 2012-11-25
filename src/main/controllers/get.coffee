@@ -1,7 +1,7 @@
 prepare_db_filters = (query_string) ->
   filters = _.clone(query_string)
   if filters.id
-    filters["_id"] = new mongodb.BSONPure.ObjectID(query_params.id)
+    filters["_id"] = new mongodb.BSONPure.ObjectID(filters.id)
     delete filters["id"]
   
   # Search for numbers as string and integer

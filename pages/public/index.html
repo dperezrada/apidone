@@ -34,7 +34,7 @@ $.ajax({
   }
 });</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 201
 Body: {"id":"509176c56768501c0c00018c"}</code></pre></div></div></div><div id="curl" class="code-examples tab-pane"><ul class="nav nav-tabs examples-specific-tab"><li class="active"><a href="#curl-create" data-toggle="tab">Create resource</a></li><li><a href="#curl-list" data-toggle="tab">List resource</a></li><li><a href="#curl-create_nested" data-toggle="tab">Create nested resource</a></li></ul><div class="tab-content"><div id="curl-create" class="tab-pane active"><h4 class="example_title">Request</h4><pre><code class="bash">curl -X POST "http://demo.apidone.com/movies" \
--d '{"id": "123", name": "Up", "year": "2009"}' \
+-d '{"id": "123", "name": "Up", "year": "2009"}' \
 -H "Content-Type: application/json"</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 201
 Body: {"id":"123"}</code></pre></div><div id="curl-list" class="tab-pane"><h4 class="example_title">Request</h4><pre><code class="bash">curl -X GET "http://demo.apidone.com/movies"</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 200
 Body: [{"id":"123","name":"Up","year":"2009"}]</code></pre></div><div id="curl-create_nested" class="tab-pane"><h4 class="example_title">Request</h4><pre><code class="bash">curl -X POST \
