@@ -21,11 +21,19 @@ get_sort = (query, filters) ->
   return [_sort_by, _sort_type]
 
 get_limit = (query, filters) ->
-  if query.l
-    limit_int = parseInt(query.l, 10)
+  if query._limit
+    limit_int = parseInt(query._limit, 10)
     unless isNaN(limit_int)
-      delete filters["l"]
+      delete filters["_limit"]
       return limit_int
+  return 0
+
+get_skip = (query, filters) ->
+  if query._skip
+    skip_int = parseInt(query._skip, 10)
+    unless isNaN(skip_int)
+      delete filters["_skip"]
+      return skip_int
   return 0
 
 app.get "/*", (request, response) ->
@@ -55,6 +63,7 @@ app.get "/*", (request, response) ->
             filters = prepare_db_filters(request.query)
             [_sort_by, _sort_type] = get_sort(request.query, filters)
             limit = get_limit(request.query, filters)
+            skip = get_skip(request.query, filters)
             filters["_internal_parent_url"] = get_prefix_interal_url(request.route.params[0])
 
             if request.query._select_distinct
@@ -68,7 +77,7 @@ app.get "/*", (request, response) ->
 
             else
               collection.find filters, {}, (error, cursor) ->
-                cursor.sort([[_sort_by, _sort_type]]).limit(limit).toArray (err, items) ->
+                cursor.sort([[_sort_by, _sort_type]]).limit(limit).skip(skip).toArray (err, items) ->
                   to_return = []
                   if items is null or items.length is 0
                     to_return = request.query._default  if request.query._default
