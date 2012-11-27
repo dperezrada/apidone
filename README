@@ -3,13 +3,13 @@ npm install -d
 npm update
 
 #Run test
-cake -a "admin" build; cake -a "admin" build; ./run_test.sh
+cake -a "admin" build; cake -a "main" build; ./run_test.sh
 
 #Generate pages
 jade -w ../src/pages/*.jade --out ../public/
 
 #Start admin server
-cake -a "admin" build; cake -a "admin" build; ./start_dev.sh
+cake -a "admin" build; cake -a "main" build; ./start_dev.sh
 
 #Prepare server for the first time
 fab api ubuntu fresh_install

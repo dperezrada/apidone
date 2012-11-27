@@ -17,6 +17,9 @@ export APIDONE_HOST=localhost
 export APIDONE_PORT=3001
 export APIDONE_DEFAULT_SUBDOMAIN=test
 
+echo "Generating admin files"
+cake -a "admin" build; cake -a "main" build;
+
 mkdir -p logs
 echo "Starting the server"
 nohup node lib/main.js test_apidone > logs/server.log &
