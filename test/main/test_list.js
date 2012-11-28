@@ -64,7 +64,25 @@ describe('List resources', function(){
 		it('should get the correct movie', function(done){
 			request.get({url: utils.absolute_url('/movies?name=Nine%20queens')}, 
 				function (e, response, body){
-					assert.deepEqual([{'id': self.movies[1].id, 'name': 'Nine queens', 'year': 2000}], JSON.parse(body));
+					assert.deepEqual([
+						{
+							'id': self.movies[1].id,
+							'name': 'Nine queens',
+							'year': 2000
+						}
+					], JSON.parse(body));
+					done();
+				}
+			);
+		});	
+	});
+	describe('Filter resources by doing GET to /<resources>?id=:id', function(){
+		it('should the movie with that id', function(done){
+			request.get({url: utils.absolute_url('/movies?id='+self.movies[0].id)}, 
+				function (e, response, body){
+					assert.deepEqual([
+						{'id': self.movies[0].id, 'name': 'The Matrix', 'year': 1999}
+					], JSON.parse(body));
 					done();
 				}
 			);
@@ -97,7 +115,12 @@ describe('List resources', function(){
 			request.get({url: utils.absolute_url('/movies?_sort_by=year&_sort_type=asc')}, 
 				function (e, response, body){
 					assert.deepEqual([{'id': self.movies[0].id, 'name': 'The Matrix', 'year': 1999}, {'id': self.movies[1].id, 'name': 'Nine queens', 'year': 2000}], JSON.parse(body));
-					done();
+					request.get({url: utils.absolute_url('/movies?_sort_by=year&_sort_type=desc')}, 
+						function (e, response, body){
+							assert.deepEqual([{'id': self.movies[1].id, 'name': 'Nine queens', 'year': 2000}, {'id': self.movies[0].id, 'name': 'The Matrix', 'year': 1999}], JSON.parse(body));
+							done();
+						}
+					)
 				}
 			);
 		});	

@@ -9,6 +9,33 @@ prepare_db_filters = (query_string) ->
     filters[key] = $in: [filters[key], parseInt(filters[key], 10)]  unless isNaN(parseInt(filters[key], 10))
   filters
 
+get_sort = (query, filters) ->
+  _sort_by = "_id"
+  _sort_type = "desc"
+  if query._sort_by
+    _sort_by = query._sort_by
+    delete filters["_sort_by"]
+  if query._sort_type
+    _sort_type = query._sort_type
+    delete filters["_sort_type"]
+  return [_sort_by, _sort_type]
+
+get_limit = (query, filters) ->
+  if query._limit
+    limit_int = parseInt(query._limit, 10)
+    unless isNaN(limit_int)
+      delete filters["_limit"]
+      return limit_int
+  return 0
+
+get_skip = (query, filters) ->
+  if query._skip
+    skip_int = parseInt(query._skip, 10)
+    unless isNaN(skip_int)
+      delete filters["_skip"]
+      return skip_int
+  return 0
+
 app.get "/*", (request, response) ->
   if request.route.params[0] is "__resources"
     Mongo.get_collections db, retrieve_subdomain(request), (err, collections) ->
@@ -34,18 +61,13 @@ app.get "/*", (request, response) ->
             response.send result
           else
             filters = prepare_db_filters(request.query)
+            [_sort_by, _sort_type] = get_sort(request.query, filters)
+            limit = get_limit(request.query, filters)
+            skip = get_skip(request.query, filters)
             filters["_internal_parent_url"] = get_prefix_interal_url(request.route.params[0])
-            _sort_by = "_id"
-            _sort_type = "desc"
-            if request.query._sort_by
-              _sort_by = request.query._sort_by
-              delete filters["_sort_by"]
-            if request.query._sort_type
-              _sort_type = request.query._sort_type
-              delete filters["_sort_type"]
+
             if request.query._select_distinct
               delete filters["_select_distinct"]
-
               collection.distinct request.query._select_distinct, filters, (error, items) ->
                 response.send _.map(items, (item) ->
                   response_item = {}
@@ -55,7 +77,7 @@ app.get "/*", (request, response) ->
 
             else
               collection.find filters, {}, (error, cursor) ->
-                cursor.sort([[_sort_by, _sort_type]]).toArray (err, items) ->
+                cursor.sort([[_sort_by, _sort_type]]).limit(limit).skip(skip).toArray (err, items) ->
                   to_return = []
                   if items is null or items.length is 0
                     to_return = request.query._default  if request.query._default
