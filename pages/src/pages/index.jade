@@ -5,6 +5,7 @@ block vars
   - var body_class='home'
 
 block content
+  include examples/utils
   .hero-unit.text-centered.main
     h1 APIdone
     h2 A ready to use backend
@@ -13,20 +14,25 @@ block content
     a.btn.btn-primary.btn-large.btn-success.btn-invite(href='register.html') 30 days Free trial
     p.no_cc No Credit card required
   .container
+
     .hero-unit.text-centered.examples
       h2.text-left Examples
       p.text-left We can easily use APIdone to store, retrieve, update and delete information. For example we are going to show a simple way to store, movies information.
 
-      ul.nav.nav-tabs.examples-tab
-        li.active
-          a(href="#jquery", data-toggle="tab") jQuery
-        li
-          a(href="#curl", data-toggle="tab") Curl
-      div.tab-content
-        div#jquery.code-examples.specific.tab-pane.active
-          include examples/jquery_base
-        div#curl.code-examples.tab-pane
-          include examples/curl_base
+      h3 Create Resource
+      include examples/create
+
+      h3 List Resources
+      include examples/list
+
+      h3 Get One Resource
+      include examples/get
+
+      h3 Create Nested Resource
+      include examples/create_nested
+
+      h3 List Resources using filters
+      include examples/list_w_filter
 
       a.btn.btn-primary.btn-large.btn-success.btn-invite(href='register.html') 30 days Free trial
       p.no_cc No Credit card required

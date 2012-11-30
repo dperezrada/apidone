@@ -121,6 +121,8 @@ body {
 .examples {
   padding: 20px 20px;
   background: transparent !important;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 .examples .row {
   margin-top: 50px;
@@ -128,6 +130,21 @@ body {
 }
 .examples .image-holder {
   height: 220px;
+}
+.examples pre {
+  width: 600px;
+  margin: auto;
+}
+.examples pre .carousel img {
+  margin: auto;
+}
+.examples pre code {
+  width: 600px;
+}
+.examples pre .show-code-btn {
+  text-align: right;
+  display: block;
+  margin: 10px 0;
 }
 .features {
   margin-bottom: 0;
@@ -277,10 +294,6 @@ code {
 }
 ul.examples-tab {
   margin-bottom: 0;
-}
-.examples {
-  margin-bottom: 0;
-  padding-bottom: 0;
 }
 .features {
   margin-top: 0;

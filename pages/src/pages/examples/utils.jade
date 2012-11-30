@@ -1,0 +1,8 @@
+mixin resource_header(name)
+  ul.nav.nav-tabs.examples-tab
+    li.active
+      a(href="#description-#{name}", data-toggle="tab") Description
+    li
+      a(href="#jquery-#{name}", data-toggle="tab") jQuery
+    li
+      a(href="#curl-#{name}", data-toggle="tab") Curl

@@ -1,0 +1,7 @@
+code.js.
+  $.ajax({
+    url: 'http://demo.apidone.com/movies/123',
+    success: function(data, textStatus, xhr) {
+      alert("Movie name: "+data.name);
+    }
+  });

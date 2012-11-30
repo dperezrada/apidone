@@ -1,0 +1,10 @@
+code.js.
+  $.ajax({
+    url: 'http://demo.apidone.com/movies/123/awards',
+    type: 'POST',
+    dataType: 'json',
+    data: {"id": "1", "name": "Oscar", "year": "2010"},
+    success: function(data, textStatus, xhr) {
+      alert("Id:"+data.id);
+    }
+  });

@@ -4,43 +4,42 @@
 </script></head><body class="home"><!--[if lt IE 7]><p class="chromeframe">You are using an outdated browser.
 Please <a href="http://browsehappy.com/">upgrade your browser</a> or
 <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a>
-to improve your experience.</p><![endif]--><div class="hero-unit text-centered main"><h1>APIdone</h1><h2>A ready to use backend</h2><p class="text-centered landing">APIdone is a ready to use RESTful API. That will save you the hassle of creating an API, setup a server and install a database.</p><a href="register.html" class="btn btn-primary btn-large btn-success btn-invite">30 days Free trial</a><p class="no_cc">No Credit card required</p></div><div class="container"><div class="hero-unit text-centered examples"><h2 class="text-left">Examples</h2><p class="text-left">We can easily use APIdone to store, retrieve, update and delete information. For example we are going to show a simple way to store, movies information.</p><ul class="nav nav-tabs examples-tab"><li class="active"><a href="#jquery" data-toggle="tab">jQuery</a></li><li><a href="#curl" data-toggle="tab">Curl</a></li></ul><div class="tab-content"><div id="jquery" class="code-examples specific tab-pane active"><ul class="nav nav-tabs examples-specific-tab"><li class="active"><a href="#jquery-create" data-toggle="tab">Create resource</a></li><li><a href="#jquery-list" data-toggle="tab">List resource</a></li><li><a href="#jquery-create_nested" data-toggle="tab">Create nested resource</a></li></ul><div class="tab-content"><div id="jquery-create" class="tab-pane active"><h4 class="example_title">Request</h4><pre><code class="js">url = 'http://demo.apidone.com/movies';
-data = {"id": "123", "name": "Up", "year": "2009"};
-$.ajax({
-  url: url,
+to improve your experience.</p><![endif]--><div class="hero-unit text-centered main"><h1>APIdone</h1><h2>A ready to use backend</h2><p class="text-centered landing">APIdone is a ready to use RESTful API. That will save you the hassle of creating an API, setup a server and install a database.</p><a href="register.html" class="btn btn-primary btn-large btn-success btn-invite">30 days Free trial</a><p class="no_cc">No Credit card required</p></div><div class="container"><div class="hero-unit text-centered examples"><h2 class="text-left">Examples</h2><p class="text-left">We can easily use APIdone to store, retrieve, update and delete information. For example we are going to show a simple way to store, movies information.</p><h3>Create Resource</h3><ul class="nav nav-tabs examples-tab"><li class="active"><a href="#description-create" data-toggle="tab">Description</a></li><li><a href="#jquery-create" data-toggle="tab">jQuery</a></li><li><a href="#curl-create" data-toggle="tab">Curl</a></li></ul><div class="tab-content"><div id="description-create" class="code-examples specific tab-pane active"><img src="/assets/img/explained1.png"></div><div id="jquery-create" class="code-examples tab-pane"><code class="js">$.ajax({
+  url: 'http://demo.apidone.com/movies',
   type: 'POST',
   dataType: 'json',
-  data: JSON.stringify(data),
+  data: {"id": "123", "name": "Up", "year": "2009"},
   success: function(data, textStatus, xhr) {
     alert("Id:"+data.id);
   }
-});</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 201
-Body: {"id":"123"}</code></pre></div><div id="jquery-list" class="tab-pane"><h4 class="example_title">Request</h4><pre><code class="js">url = 'http://demo.apidone.com/movies';
-$.ajax({
-  url: url,
-  success: function(data, textStatus, xhr) {
-    alert("Id:"+data.id);
-  }
-});</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 200
-Body: [{"id":"123","name":"Up","year":"2009"}]</code></pre></div><div id="jquery-create_nested" class="tab-pane"><h4 class="example_title">Request</h4><pre><code class="js">url = 'http://demo.apidone.com/movies/123/awards';
-data = {"name": "Oscar", "year": "2010", "total": 2};
-$.ajax({
-  url: url,
-  type: 'POST',
-  dataType: 'json',
-  data: JSON.stringify(data),
-  success: function(data, textStatus, xhr) {
-    alert("Id:"+data.id);
-  }
-});</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 201
-Body: {"id":"509176c56768501c0c00018c"}</code></pre></div></div></div><div id="curl" class="code-examples tab-pane"><ul class="nav nav-tabs examples-specific-tab"><li class="active"><a href="#curl-create" data-toggle="tab">Create resource</a></li><li><a href="#curl-list" data-toggle="tab">List resource</a></li><li><a href="#curl-create_nested" data-toggle="tab">Create nested resource</a></li></ul><div class="tab-content"><div id="curl-create" class="tab-pane active"><h4 class="example_title">Request</h4><pre><code class="bash">curl -X POST "http://demo.apidone.com/movies" \
+});</code></div><div id="curl-create" class="code-examples tab-pane"><code class="bash">curl -X POST "http://demo.apidone.com/movies" \
 -d '{"id": "123", "name": "Up", "year": "2009"}' \
--H "Content-Type: application/json"</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 201
-Body: {"id":"123"}</code></pre></div><div id="curl-list" class="tab-pane"><h4 class="example_title">Request</h4><pre><code class="bash">curl -X GET "http://demo.apidone.com/movies"</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 200
-Body: [{"id":"123","name":"Up","year":"2009"}]</code></pre></div><div id="curl-create_nested" class="tab-pane"><h4 class="example_title">Request</h4><pre><code class="bash">curl -X POST \
-"http://demo.apidone.com/movies/123/awards" \
--d '{"name": "Oscar", "year": "2010", "total": 2}'</code></pre><h4 class="example_title">Response</h4><pre><code class="js">Status: 201
-Body: {"id":"509176c56768501c0c00018c"}</code></pre></div></div></div></div><a href="register.html" class="btn btn-primary btn-large btn-success btn-invite">30 days Free trial</a><p class="no_cc">No Credit card required</p></div></div><div class="container text-centered features"><h2 class="text-left">Features</h2><div class="row"><div class="span4"><div class="image-holder"><img src="assets/img/features_save_time.png" alt="Save time" style="border: 0; width: 190px;"></div><p class="text-centered">Don't waste your time building a Backend, save it and focus in your front-end, mobile app or iOS app.</p></div><div class="span4"><div class="image-holder"><img src="assets/img/features_rest.png" alt="REST" style="border: 0; margin-top: 20px;"></div><p class="text-centered">A flexible REST API, you can define how you want you use it (see examples).</p></div><div class="span4"><div class="image-holder"><img src="assets/img/features_secure.png" alt="Secure" style="border: 0; width: 120px;"></div><p class="text-centered">We store you data in a secure location.</p></div></div></div><div class="hero-unit footer"><div class="container"><div class="row"><div class="span4"><h4>Navigation</h4><dl style="margin-left: -9px;"><dd><a href="/">Home</a></dd><dd><a href="#" onclick="_gaq.push(['_trackPageview', 'pricing']);return false;">Pricing</a></dd><dd><a href="docs.html">Documentation</a></dd></dl></div><div class="span4"><h4>Legal</h4><dl style="margin-left: -9px;"><dd><a href="#" onclick="_gaq.push(['_trackPageview', 'tos']);return false;">Terms of Service</a></dd><dd><a href="#" onclick="_gaq.push(['_trackPageview', 'pp']);return false;">Privacy Policy</a></dd></dl></div><div class="span4"><h4>Contact us</h4><dl style="margin-left: -9px;"><dd>© APIdone 2012</dd><dd>contact@apidone.com</dd></dl></div></div></div></div><script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script><script>window.jQuery || document.write('<script src="/assets/js/jquery-1.8.2-min.js"><\\/script>')</script><script src="/assets/js/bootstrap.js"></script><script src="/assets/js/underscore-min.js"></script><script src="/assets/js/backbone-min.js"></script><script>var _gaq=[['_setAccount','UA-30870849-2'],['_trackPageview']];
+-H "Content-Type: application/json"</code></div></div><h3>List Resources</h3><ul class="nav nav-tabs examples-tab"><li class="active"><a href="#description-list" data-toggle="tab">Description</a></li><li><a href="#jquery-list" data-toggle="tab">jQuery</a></li><li><a href="#curl-list" data-toggle="tab">Curl</a></li></ul><div class="tab-content"><div id="description-list" class="code-examples specific tab-pane active"><img src="/assets/img/explained2.png"></div><div id="jquery-list" class="code-examples tab-pane"><code class="js">$.ajax({
+  url: 'http://demo.apidone.com/movies',
+  success: function(data, textStatus, xhr) {
+    alert("Total movies: "+data.length);
+  }
+});</code></div><div id="curl-list" class="code-examples tab-pane"><code class="bash">curl -X GET "http://demo.apidone.com/movies"</code></div></div><h3>Get One Resource</h3><ul class="nav nav-tabs examples-tab"><li class="active"><a href="#description-get" data-toggle="tab">Description</a></li><li><a href="#jquery-get" data-toggle="tab">jQuery</a></li><li><a href="#curl-get" data-toggle="tab">Curl</a></li></ul><div class="tab-content"><div id="description-get" class="code-examples specific tab-pane active"><img src="/assets/img/explained3.png"></div><div id="jquery-get" class="code-examples tab-pane"><code class="js">$.ajax({
+  url: 'http://demo.apidone.com/movies/123',
+  success: function(data, textStatus, xhr) {
+    alert("Movie name: "+data.name);
+  }
+});</code></div><div id="curl-get" class="code-examples tab-pane"><code class="bash">curl -X GET "http://demo.apidone.com/movies/123"</code></div></div><h3>Create Nested Resource</h3><ul class="nav nav-tabs examples-tab"><li class="active"><a href="#description-create_nested" data-toggle="tab">Description</a></li><li><a href="#jquery-create_nested" data-toggle="tab">jQuery</a></li><li><a href="#curl-create_nested" data-toggle="tab">Curl</a></li></ul><div class="tab-content"><div id="description-create_nested" class="code-examples specific tab-pane active"><img src="/assets/img/explained4.png"></div><div id="jquery-create_nested" class="code-examples tab-pane"><code class="js">$.ajax({
+  url: 'http://demo.apidone.com/movies/123/awards',
+  type: 'POST',
+  dataType: 'json',
+  data: {"id": "1", "name": "Oscar", "year": "2010"},
+  success: function(data, textStatus, xhr) {
+    alert("Id:"+data.id);
+  }
+});</code></div><div id="curl-create_nested" class="code-examples tab-pane"><code class="bash">curl -X POST "http://demo.apidone.com/movies/123/awards" \
+  -d '{"id": "1", "name": "Oscar", "year": "2010"}' \
+  -H "Content-Type: application/json"</code></div></div><h3>List Resources using filters</h3><ul class="nav nav-tabs examples-tab"><li class="active"><a href="#description-list_w_filter" data-toggle="tab">Description</a></li><li><a href="#jquery-list_w_filter" data-toggle="tab">jQuery</a></li><li><a href="#curl-list_w_filter" data-toggle="tab">Curl</a></li></ul><div class="tab-content"><div id="description-list_w_filter" class="code-examples specific tab-pane active"><img src="/assets/img/explained5.png"></div><div id="jquery-list_w_filter" class="code-examples tab-pane"><code class="js">$.ajax({
+  url: 'http://demo.apidone.com/movies?category=comedy',
+  success: function(data, textStatus, xhr) {
+    alert("Total movies: "+data.length);
+  }
+});</code></div><div id="curl-list_w_filter" class="code-examples tab-pane"><code class="bash">curl -X GET "http://demo.apidone.com/movies?category=comedy"</code></div></div><a href="register.html" class="btn btn-primary btn-large btn-success btn-invite">30 days Free trial</a><p class="no_cc">No Credit card required</p></div></div><div class="container text-centered features"><h2 class="text-left">Features</h2><div class="row"><div class="span4"><div class="image-holder"><img src="assets/img/features_save_time.png" alt="Save time" style="border: 0; width: 190px;"></div><p class="text-centered">Don't waste your time building a Backend, save it and focus in your front-end, mobile app or iOS app.</p></div><div class="span4"><div class="image-holder"><img src="assets/img/features_rest.png" alt="REST" style="border: 0; margin-top: 20px;"></div><p class="text-centered">A flexible REST API, you can define how you want you use it (see examples).</p></div><div class="span4"><div class="image-holder"><img src="assets/img/features_secure.png" alt="Secure" style="border: 0; width: 120px;"></div><p class="text-centered">We store you data in a secure location.</p></div></div></div><div class="hero-unit footer"><div class="container"><div class="row"><div class="span4"><h4>Navigation</h4><dl style="margin-left: -9px;"><dd><a href="/">Home</a></dd><dd><a href="#" onclick="_gaq.push(['_trackPageview', 'pricing']);return false;">Pricing</a></dd><dd><a href="docs.html">Documentation</a></dd></dl></div><div class="span4"><h4>Legal</h4><dl style="margin-left: -9px;"><dd><a href="#" onclick="_gaq.push(['_trackPageview', 'tos']);return false;">Terms of Service</a></dd><dd><a href="#" onclick="_gaq.push(['_trackPageview', 'pp']);return false;">Privacy Policy</a></dd></dl></div><div class="span4"><h4>Contact us</h4><dl style="margin-left: -9px;"><dd>© APIdone 2012</dd><dd>contact@apidone.com</dd></dl></div></div></div></div><script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script><script>window.jQuery || document.write('<script src="/assets/js/jquery-1.8.2-min.js"><\\/script>')</script><script src="/assets/js/bootstrap.js"></script><script src="/assets/js/underscore-min.js"></script><script src="/assets/js/backbone-min.js"></script><script>var _gaq=[['_setAccount','UA-30870849-2'],['_trackPageview']];
 (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
 g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
 s.parentNode.insertBefore(g,s)}(document,'script'));</script><script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script><script>hljs.initHighlightingOnLoad();</script></body></html>

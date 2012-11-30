@@ -1,11 +1,9 @@
 code.js.
-  url = 'http://demo.apidone.com/movies';
-  data = {"id": "123", "name": "Up", "year": "2009"};
   $.ajax({
-    url: url,
+    url: 'http://demo.apidone.com/movies',
     type: 'POST',
     dataType: 'json',
-    data: JSON.stringify(data),
+    data: {"id": "123", "name": "Up", "year": "2009"},
     success: function(data, textStatus, xhr) {
       alert("Id:"+data.id);
     }
