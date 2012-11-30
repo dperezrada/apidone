@@ -54,15 +54,26 @@ body {
 .examples {
     padding: 20px 20px;
     background: transparent !important;
-}
-
-.examples .row {
-    margin-top: 50px;
-    margin-left: 0;
-}
-
-.examples .image-holder {
-    height: 220px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    .row {
+        margin-top: 50px;
+        margin-left: 0;
+    }
+    .image-holder {
+        height: 220px;
+    }
+    pre {
+        margin: auto;
+        .carousel img {
+           margin: auto;
+        }
+        .show-code-btn {
+            text-align: right;
+            display: block;
+            margin: 10px 0;
+        }
+    }
 }
 
 .features {
@@ -237,10 +248,6 @@ code{
 ul.examples-tab{
     margin-bottom: 0;
 }
-.examples{
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
 .features{
     margin-top: 0;
     padding-top: 0;
@@ -258,4 +265,20 @@ ul.examples-tab{
     color: black;
     padding: 12px;
     .rounded-corners;
+}
+
+.main_custom{
+    background-color: inherit;
+}
+.api_method{
+    margin-bottom: 10px;
+    .indent{
+        background-color: #DDD;
+        .rounded-corners(10px);
+        padding: 10px;
+        margin-left: 30px;
+    }
+}
+.navbar{
+    margin: 0;
 }

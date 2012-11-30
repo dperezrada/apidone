@@ -121,6 +121,8 @@ body {
 .examples {
   padding: 20px 20px;
   background: transparent !important;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 .examples .row {
   margin-top: 50px;
@@ -128,6 +130,17 @@ body {
 }
 .examples .image-holder {
   height: 220px;
+}
+.examples pre {
+  margin: auto;
+}
+.examples pre .carousel img {
+  margin: auto;
+}
+.examples pre .show-code-btn {
+  text-align: right;
+  display: block;
+  margin: 10px 0;
 }
 .features {
   margin-bottom: 0;
@@ -278,10 +291,6 @@ code {
 ul.examples-tab {
   margin-bottom: 0;
 }
-.examples {
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
 .features {
   margin-top: 0;
   padding-top: 0;
@@ -295,6 +304,25 @@ ul.examples-tab {
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
   border-radius: 5px;
+}
+.main_custom {
+  background-color: inherit;
+}
+.api_method {
+  margin-bottom: 10px;
+}
+.api_method .indent {
+  background-color: #DDD;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  border-radius: 10px;
+  padding: 10px;
+  margin-left: 30px;
+}
+.navbar {
+  margin: 0;
 }
 /* ==========================================================================
    Helper classes

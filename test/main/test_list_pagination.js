@@ -55,9 +55,9 @@ describe('List resources', function(){
 			});
 		});
 	});
-	describe('Skip resources with by doing GET to /<resources>?_skip=2', function(){
+	describe('Skip resources with by doing GET to /<resources>?_offset=2', function(){
 		it('should get the list of movies', function(done){
-			get_url('/movies?_limit=2&_skip=2&_sort_by=year&_sort_type=desc', function(movies){
+			get_url('/movies?_limit=2&_offset=2&_sort_by=year&_sort_type=desc', function(movies){
 				assert.equal(2, movies.length);
 				assert.equal(1988, movies[0].year);
 				assert.equal(1975, movies[1].year);

@@ -27,8 +27,8 @@ check_subdomain = (collection, subdomain, callback) ->
 			callback err, null
 		else if account and account.subdomain
 			callback null, 'Not Available'
-		else if subdomain.length <10
-			callback null, 'Must have length of 10 or more'
+		else if subdomain.length <7
+			callback null, 'Must have length of 7 or more'
 		else
 			callback null, 'Available'
 

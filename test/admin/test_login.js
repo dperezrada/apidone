@@ -73,19 +73,19 @@ describe('Invalid Login with new account', function(){
 });
 
 describe('Shouldnt be able to create short subdomain', function(){
-	it('with less than 10 chars', function(done){
+	it('with less than 7 chars', function(done){
 		request.post(
 			{
 				url: utils.absolute_url('/accounts', 'admin'),
 				json: {
 					email: "testing1@hola.com", 
 					pass: "12345",
-					subdomain: "123456789"
+					subdomain: "123456"
 				}
 			},
 			function (err, response, body){
 				assert.equal(409, response.statusCode);
-				assert.equal('Must have length of 10 or more', body.err);
+				assert.equal('Must have length of 7 or more', body.err);
 				done();
 			}
 		)
