@@ -11,6 +11,7 @@ html(class='no-js')
   head
     //- script(src="//cdn.optimizely.com/js/112447419.js")
     - var body_class=''
+    - var home=''
     block vars
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
@@ -32,13 +33,28 @@ html(class='no-js')
         BASE_URL = 'http://tarro:3002'
       }
 
-  body(class="#{body_class}")
+  body(class="#{body_class}", data-spy="scroll", data-target=".navbar")
     //if lt IE 7
       p.chromeframe.
         You are using an outdated browser.
         Please <a href="http://browsehappy.com/">upgrade your browser</a> or
         <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a>
         to improve your experience.
+
+    div#MainNavbar.navbar.navbar-static
+      div.navbar-inner
+        div.container
+          - if (home)
+            span 
+          - else
+            a(class="brand", href="/") Apidone
+          ul.nav
+            li
+              a(href="/index.html#examples") Examples
+            li
+              a(href="/docs.html") Documentation
+            li
+              a(href="/register.html") Register
     block content
 
     .hero-unit.footer

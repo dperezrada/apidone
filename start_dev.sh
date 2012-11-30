@@ -4,7 +4,7 @@ DIR=`pwd`
 
 get_process()
 {
-	echo `ps -ef | grep "node" | grep "$1" | grep -v "grep" | awk '{print $2}'`;
+	echo `ps -ef | grep "$1" | grep -v "grep" | awk '{print $2}'`;
 }
 
 kill_process()

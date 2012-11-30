@@ -1,0 +1,58 @@
+extends ../base
+
+block vars
+  - var title='APIdone - Documentation'
+
+mixin api_method(name, method, url, body)
+  div.api_method
+    h4 #{name}
+    div.indent
+      p Method: 
+        strong #{method}
+      p Example URL:
+        strong  #{url}
+      - if (body)
+        p Example #{method} Body:
+          strong  #{body}
+
+mixin api_table_method(name, method, url, body)
+  tr
+    td #{method}
+    td #{url}
+    td #{name}
+
+block content
+  div.main_custom
+    div.container
+      h3.text-centered Core API
+      table.table.table-bordered
+        thead
+          tr
+            th method
+            th example url
+            th name
+        tbody
+          mixin api_table_method("List resources", "GET", "/movies")
+          mixin api_table_method("Create resource", "POST", "/movies", '{"id": "123", "name": "Hot Fuzz"}')
+          mixin api_table_method("Update resource", "PUT", "/movies/123", '{"id": "123", "name": "Hot Fuzz", "year": 2009}')
+          mixin api_table_method("Create resource (if id doesn't exists)", "PUT", "/movies/456", '{"name": "Drunken Master"}')
+          mixin api_table_method("You can use any url to create a resource", "POST", "/my_url_is_using_prefix/tasks", '{"name": "Buy milk"}')
+          mixin api_table_method("Delete resource", "DELETE", "/movies/123")
+          mixin api_table_method("List with filter", "GET", "/movies?category=drama")
+          mixin api_table_method("Limit number of results", "GET", "/movies?_limit=10&_offset=20")
+          mixin api_table_method("List distinct elements of collection", "GET", "/movies?_select_distinct=name")
+
+      mixin api_method("List resources", "GET", "/movies")
+      mixin api_method("Create resource", "POST", "/movies", '{"id": "123", "name": "Hot Fuzz"}')
+      mixin api_method("Update resource", "PUT", "/movies/123", '{"id": "123", "name": "Hot Fuzz", "year": 2009}')
+      mixin api_method("Create resource (if id doesn't exists)", "PUT", "/movies/456", '{"name": "Drunken Master"}')
+      mixin api_method("You can use any url to create a resource", "POST", "/my_url_is_using_prefix/tasks", '{"name": "Buy milk"}')
+      mixin api_method("Delete resource", "DELETE", "/movies/123")
+      mixin api_method("List with filter", "GET", "/movies?category=drama")
+      mixin api_method("Limit number of results", "GET", "/movies?_limit=10&_offset=20")
+      mixin api_method("List distinct elements of collection", "GET", "/movies?_select_distinct=name")
+
+    div.container
+      h3 Examples
+        div
+          a(href="/docs_todo.html") Creating TODO list

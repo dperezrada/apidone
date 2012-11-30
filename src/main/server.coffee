@@ -9,15 +9,15 @@ formatErrorHandler = (err, req, res, next) ->
   else
     next err
 
-get_extension = (req, res, next) ->
-  req.extension = req.originalUrl.match(/.*\.([^\.]*)$/)
-  next()
+# get_extension = (req, res, next) ->
+#   req.extension = req.originalUrl.match(/.*\.([^\.]*)$/)
+#   next()
 
 configure_app = (app) ->
   app.configure ->
     app.use express.bodyParser()
     app.use express.cookieParser()
-    app.use get_format
+    # app.use get_format
     app.use app.router
     app.use formatErrorHandler
 

@@ -132,14 +132,10 @@ body {
   height: 220px;
 }
 .examples pre {
-  width: 600px;
   margin: auto;
 }
 .examples pre .carousel img {
   margin: auto;
-}
-.examples pre code {
-  width: 600px;
 }
 .examples pre .show-code-btn {
   text-align: right;
@@ -308,6 +304,22 @@ ul.examples-tab {
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
   border-radius: 5px;
+}
+.main_custom {
+  background-color: inherit;
+}
+.api_method {
+  margin-bottom: 10px;
+}
+.api_method .indent {
+  background-color: #DDD;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  border-radius: 10px;
+  padding: 10px;
+  margin-left: 30px;
 }
 /* ==========================================================================
    Helper classes
