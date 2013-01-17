@@ -32,6 +32,7 @@ prodCoffeeFiles = {
         'main/controllers/post'
         'main/controllers/put'
         'main/controllers/delete'
+        'main/controllers/options'
         'main/server_start'
     ],
     'admin': [
