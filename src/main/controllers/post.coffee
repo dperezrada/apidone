@@ -14,6 +14,6 @@ app.post "/*", (request, response) ->
 			response.statusCode = 503
 			response.send "Internal Server Error"
 		else
-			response.statusCode = 201
+			response.status(201)
 			response.header "Location", final_url
 			response.send id: id

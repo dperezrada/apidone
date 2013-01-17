@@ -20,6 +20,9 @@ export APIDONE_DEFAULT_SUBDOMAIN=test
 echo "Generating admin files"
 cake -a "admin" build; cake -a "main" build;
 
+echo "Compiling tests"
+coffee --output test/main --compile test/main/*.coffee
+
 mkdir -p logs
 echo "Starting the server"
 nohup node lib/main.js test_apidone > logs/server.log &
