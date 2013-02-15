@@ -1,8 +1,11 @@
 prepare_db_filters = (query_string) ->
   filters = _.clone(query_string)
   if filters.id
-    filters["_id"] = new mongodb.BSONPure.ObjectID(filters.id)
-    delete filters["id"]
+    try
+      filters["_id"] = new mongodb.BSONPure.ObjectID(filters.id)
+      delete filters["id"]
+    catch error
+      console.log("cannot convert to mongodb id: "+filters.id)
   
   # Search for numbers as string and integer
   for key of filters
