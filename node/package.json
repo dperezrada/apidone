@@ -1,0 +1,17 @@
+{
+  "name": "apidone",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "coffee-script": "latest",
+    "express": "latest",
+    "async": "latest",
+    "underscore": "latest",
+    "mongodb": "latest",
+    "mocha": "latest",
+    "request": "latest"
+  },
+  "directories": {
+    "lib": "./lib"
+  }
+}
