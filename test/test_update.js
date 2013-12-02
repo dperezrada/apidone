@@ -74,7 +74,7 @@ describe('Parallel update', function(){
 		];
 		async.series([
 			function(callback){
-				async.parallel(
+				async.series(
 					[
 						async.apply(create_movie, movies[0]),
 						async.apply(create_movie, movies[1]),
