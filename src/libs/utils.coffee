@@ -11,3 +11,13 @@ get_prefix_interal_url = (prefix) ->
 
 create_internal_url = (prefix, id) ->
   get_prefix_interal_url(prefix) + "/" + id
+
+clone_request = (request) ->
+  return {
+    route: {
+      params: clone(request.route.params)
+    },
+    body: clone(request.body),
+    collection: clone(request.collection),
+    query: clone(request.query)
+  }

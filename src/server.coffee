@@ -1,6 +1,7 @@
 express = require("express")
 async = require("async")
 _ = require("underscore")
+clone = require('clone')
 
 formatErrorHandler = (err, req, res, next) ->
   if err and err.type is "unexpected_token"

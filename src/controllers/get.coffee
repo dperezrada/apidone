@@ -40,13 +40,14 @@ get_offset = (query, filters) ->
   return 0
 
 app.get "/*", (request, response) ->
-  if request.route.params[0] is "__resources"
-    Mongo.get_collections db, retrieve_subdomain(request), (err, collections) ->
+  local_request = clone_request(request)
+  if local_request.route.params[0] is "__resources"
+    Mongo.get_collections db, retrieve_subdomain(local_request), (err, collections) ->
       response.send collections
   else
-    db.collection request.collection, (err, collection) ->
-      if request.route.params[0].indexOf("__resources") > 0
-        internal_parent_url = request.route.params[0].replace("/__resources", "")
+    db.collection local_request.collection, (err, collection) ->
+      if local_request.route.params[0].indexOf("__resources") > 0
+        internal_parent_url = local_request.route.params[0].replace("/__resources", "")
         collection.distinct "_internal_parent_resource",
           _internal_parent_url:
             $regex: "^" + internal_parent_url + "/[^/]+$"
@@ -57,24 +58,24 @@ app.get "/*", (request, response) ->
 
       else
         collection.findOne
-          _internal_url: request.route.params[0]
+          _internal_url: local_request.route.params[0]
         , {}, (error, result) ->
           if result
             clear_response result
             response.send result
           else
-            filters = prepare_db_filters(request.query)
-            [_sort_by, _sort_type] = get_sort(request.query, filters)
-            limit = get_limit(request.query, filters)
-            offset = get_offset(request.query, filters)
-            filters["_internal_parent_url"] = get_prefix_interal_url(request.route.params[0])
+            filters = prepare_db_filters(local_request.query)
+            [_sort_by, _sort_type] = get_sort(local_request.query, filters)
+            limit = get_limit(local_request.query, filters)
+            offset = get_offset(local_request.query, filters)
+            filters["_internal_parent_url"] = get_prefix_interal_url(local_request.route.params[0])
 
-            if request.query._select_distinct
+            if local_request.query._select_distinct
               delete filters["_select_distinct"]
-              collection.distinct request.query._select_distinct, filters, (error, items) ->
+              collection.distinct local_request.query._select_distinct, filters, (error, items) ->
                 response.send _.map(items, (item) ->
                   response_item = {}
-                  response_item[request.query._select_distinct] = item
+                  response_item[local_request.query._select_distinct] = item
                   response_item
                 )
 
@@ -83,7 +84,7 @@ app.get "/*", (request, response) ->
                 cursor.sort([[_sort_by, _sort_type]]).limit(limit).skip(offset).toArray (err, items) ->
                   to_return = []
                   if items is null or items.length is 0
-                    to_return = request.query._default  if request.query._default
+                    to_return = local_request.query._default  if local_request.query._default
                     response.send to_return
                   else
                     for i of items

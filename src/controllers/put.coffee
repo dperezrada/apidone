@@ -3,22 +3,24 @@ app.put "/*",  (request, response) ->
   splited_url = request.route.params[0].split("/")
   resource_id = splited_url[splited_url.length - 1]
   delete request.body["id"]  if request.body["id"]
+
+  local_request = clone_request(request)
+
   async.waterfall [
-    async.apply(Mongo.get_collection, db, request.collection),
+    async.apply(Mongo.get_collection, db, local_request.collection),
     (collection, callback) ->
-      collection.findOne _internal_url: request.route.params[0], {}, (error, resource) ->
-        console.log(resource);
+      collection.findOne _internal_url: local_request.route.params[0], {}, (error, resource) ->
         if resource
-          console.log(resource_id + " = " +resource.id.toString());
+          # console.log(resource_id + " = " +resource.id.toString());
           found_resource = true
-          request.body["_id"] = resource["_id"]
+          local_request.body["_id"] = resource["_id"]
           collection.update
-            _internal_url: request.route.params[0]
-          , request.body, (error, result) ->
+            _internal_url: local_request.route.params[0]
+          , local_request.body, (error, result) ->
             callback error, resource["_internal_url"], resource["_id"], collection
         else
-          Mongo.insert collection, request.body, (err, inserted_docs) ->
-            callback error, request.route.params[0], inserted_docs[0]["_id"], collection
+          Mongo.insert collection, local_request.body, (err, inserted_docs) ->
+            callback error, local_request.route.params[0], inserted_docs[0]["_id"], collection
     , Mongo.update_internal_url
   ], (err, final_url, id) ->
     if err

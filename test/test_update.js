@@ -27,38 +27,38 @@ var update_movie = function(obj, movie_json, return_callback){
 	);
 };
 
-// describe('Replace resource by sending PUT to /<resources>/:resource_id', function(){
-// 	before(function(done){
-// 		self = this;
-// 		async.series([
-// 			async.apply(create_movie, self),
-// 			async.apply(update_movie, self, {'name': 'The Matrix', 'year': 1999, 'language': 'english'})
-// 		],
-// 		function(){
-// 			done();
-// 		})
-// 	});
-// 	after(function(done){
-// 		utils.get_connection(
-// 			function(err, db){
-// 				require('./libs/tear_down')(db, done);
-// 			}
-// 		);
-// 	});
-//    	it('should return 204 after updating a resource', function(done){
-// 		assert.equal(204, self.update_response.statusCode);
-// 		done();
-// 	});
-// 	it('should be able to get the updated resource', function(done){
-// 		request.get({url: utils.absolute_url('/movies/'+self.movie_id)}, function(err, response){
-// 			assert.deepEqual(
-// 				{'id': self.movie_id, 'name': 'The Matrix', 'year': 1999, 'language': 'english'},
-// 				JSON.parse(response.body)
-// 			);
-// 			done();
-// 		});
-// 	});
-// });
+describe('Replace resource by sending PUT to /<resources>/:resource_id', function(){
+	before(function(done){
+		self = this;
+		async.series([
+			async.apply(create_movie, self),
+			async.apply(update_movie, self, {'name': 'The Matrix', 'year': 1999, 'language': 'english'})
+		],
+		function(){
+			done();
+		})
+	});
+	after(function(done){
+		utils.get_connection(
+			function(err, db){
+				require('./libs/tear_down')(db, done);
+			}
+		);
+	});
+   	it('should return 204 after updating a resource', function(done){
+		assert.equal(204, self.update_response.statusCode);
+		done();
+	});
+	it('should be able to get the updated resource', function(done){
+		request.get({url: utils.absolute_url('/movies/'+self.movie_id)}, function(err, response){
+			assert.deepEqual(
+				{'id': self.movie_id, 'name': 'The Matrix', 'year': 1999, 'language': 'english'},
+				JSON.parse(response.body)
+			);
+			done();
+		});
+	});
+});
 
 
 describe('Parallel update', function(){
@@ -122,12 +122,11 @@ describe('Parallel update', function(){
 		request.get({url: utils.absolute_url('/movies/')},
 			function (err, response, body){
 				var json_response = JSON.parse(response.body);
-				console.log(json_response);
-				assert.equal(
+				assert.deepEqual(
 					_.findWhere(json_response, {'id': "1"}),
 					{'id': '1', 'name': 'The Matrix 1', 'year': 1999, 'language': 'english 1'}
 				);
-				assert.equal(
+				assert.deepEqual(
 					_.findWhere(json_response, {'id': "2"}),
 					{'id': '2', 'name': 'The Matrix 2', 'year': 1999, 'language': 'english 2'}
 				);

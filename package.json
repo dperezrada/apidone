@@ -9,7 +9,8 @@
     "underscore": "latest",
     "mongodb": "latest",
     "mocha": "latest",
-    "request": "latest"
+    "request": "latest",
+    "clone": "~0.1.11"
   },
   "directories": {
     "lib": "./lib"

@@ -26,7 +26,7 @@ nohup node dist/apidone.js test_apidone > logs/server.log 2> logs/server.err &
 sleep 2;
 
 echo "Running tests"
-./node_modules/.bin/mocha -b test/test_update;
+./node_modules/.bin/mocha -b test;
 
 PROCESS_ID=`ps -ef | grep "node" | grep "test_apidone" | grep -v "grep" | awk '{print $2}'`;
 echo "Stopping server, process_id: $PROCESS_ID"
