@@ -25,7 +25,7 @@ app.put "/*",  (request, response) ->
   ], (err, final_url, id) ->
     if err
       console.error err
-      response.statusCode = 503
+      response.statusCode = 500
       response.send "Internal Server Error"
     else if found_resource
       response.statusCode = 204

@@ -14,7 +14,7 @@ app.post "/*", (request, response) ->
   ], (err, final_url, id) ->
     if err
       console.error err
-      response.statusCode = 503
+      response.statusCode = 500
       response.send "Internal Server Error"
     else
       response.status(201)
