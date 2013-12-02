@@ -7,7 +7,7 @@ MONGODB_HOST = process.env.MONGODB_HOST or "localhost"
 MONGODB_PORT = parseInt process.env.MONGODB_PORT or 27017
 MONGODB_DBNAME = process.env.MONGODB_DBNAME or "apidone_dev"
 
-server = new Server(MONGODB_HOST, MONGODB_PORT, auto_reconnect: true)
+server = new Server(MONGODB_HOST, MONGODB_PORT, auto_reconnect: true, poolSize: 4)
 db = new Db(MONGODB_DBNAME, server, safe: true)
 
 db.open (err, data) ->

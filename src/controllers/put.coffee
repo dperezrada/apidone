@@ -7,7 +7,9 @@ app.put "/*",  (request, response) ->
     async.apply(Mongo.get_collection, db, request.collection),
     (collection, callback) ->
       collection.findOne _internal_url: request.route.params[0], {}, (error, resource) ->
+        console.log(resource);
         if resource
+          console.log(resource_id + " = " +resource.id.toString());
           found_resource = true
           request.body["_id"] = resource["_id"]
           collection.update

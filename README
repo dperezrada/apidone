@@ -1,7 +1,0 @@
-## NODE version
-cd node
-#Install
-npm install -d
-
-#Run test
-cake build; ./run_test.sh

@@ -22,11 +22,11 @@ cake build;
 
 mkdir -p logs
 echo "Starting the server"
-nohup node dist/apidone.js test_apidone > logs/server.log &
+nohup node dist/apidone.js test_apidone > logs/server.log 2> logs/server.err &
 sleep 2;
 
 echo "Running tests"
-./node_modules/.bin/mocha -b test;
+./node_modules/.bin/mocha -b test/test_update;
 
 PROCESS_ID=`ps -ef | grep "node" | grep "test_apidone" | grep -v "grep" | awk '{print $2}'`;
 echo "Stopping server, process_id: $PROCESS_ID"

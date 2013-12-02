@@ -54,7 +54,8 @@ MONGODB_PORT = parseInt(process.env.MONGODB_PORT || 27017);
 MONGODB_DBNAME = process.env.MONGODB_DBNAME || "apidone_dev";
 
 server = new Server(MONGODB_HOST, MONGODB_PORT, {
-  auto_reconnect: true
+  auto_reconnect: true,
+  poolSize: 4
 });
 
 db = new Db(MONGODB_DBNAME, server, {
@@ -385,7 +386,9 @@ app.put("/*", function(request, response) {
       return collection.findOne({
         _internal_url: request.route.params[0]
       }, {}, function(error, resource) {
+        console.log(resource);
         if (resource) {
+          console.log(resource_id + " = " + resource.id.toString());
           found_resource = true;
           request.body["_id"] = resource["_id"];
           return collection.update({
