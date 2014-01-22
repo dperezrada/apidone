@@ -196,10 +196,11 @@ retrieve_collection = function(request) {
 set_cors = function(response) {
   response.header("Access-Control-Allow-Origin", "*");
   response.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
-  return response.header("Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,DELETE");
+  return response.header("Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,PATCH,DELETE");
 };
 
 app.all("/*", function(request, response, next) {
+  console.log(request);
   request.collection = retrieve_collection(request);
   set_cors(response);
   return next();
@@ -379,7 +380,7 @@ app.post("/*", function(request, response) {
   ], function(err, final_url, id) {
     if (err) {
       console.error(err);
-      response.statusCode = 503;
+      response.statusCode = 500;
       return response.send("Internal Server Error");
     } else {
       response.status(201);
@@ -424,7 +425,7 @@ app.put("/*", function(request, response) {
   ], function(err, final_url, id) {
     if (err) {
       console.error(err);
-      response.statusCode = 503;
+      response.statusCode = 500;
       return response.send("Internal Server Error");
     } else if (found_resource) {
       response.statusCode = 204;
@@ -467,7 +468,7 @@ app["delete"]("/*", function(request, response) {
 
 app.options("/*", function(request, response) {
   response.status(200);
-  response.header("Allow", 'OPTIONS,GET,POST,PUT,DELETE');
+  response.header("Allow", 'OPTIONS,GET,POST,PUT,DELETE,PATCH');
   return response.send("");
 });
 
