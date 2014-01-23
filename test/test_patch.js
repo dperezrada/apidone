@@ -16,7 +16,6 @@ var create_movie = function(obj, return_callback){
 };
 
 var update_movie = function(obj, movie_json, return_callback){
-	console.log(utils.absolute_url('/movies/'+obj.movie_id));
 	request.patch({url: utils.absolute_url('/movies/'+obj.movie_id), json: movie_json},
 		function (err, response, body){
 			obj.update_response = response;
