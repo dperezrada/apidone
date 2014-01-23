@@ -18,17 +18,17 @@ export APIDONE_PORT=3001
 export APIDONE_DEFAULT_SUBDOMAIN=test
 
 echo "Compiling Coffee"
-cake build;
+./node_modules/coffee-script/bin/cake build;
 
 mkdir -p logs
 echo "Starting the server"
-nohup node dist/apidone.js test_apidone > logs/server.log 2> logs/server.err &
+node dist/apidone.js test_apidone > logs/server.log 2> logs/server.err &
 sleep 2;
 
 echo "Running tests"
 ./node_modules/.bin/mocha -b test;
 
-PROCESS_ID=`ps -ef | grep "node" | grep "test_apidone" | grep -v "grep" | awk '{print $2}'`;
+PROCESS_ID=`ps aux | grep "node" | grep "test_apidone" | grep -v "grep" | awk '{print $2}'`;
 echo "Stopping server, process_id: $PROCESS_ID"
 kill $PROCESS_ID;
 
