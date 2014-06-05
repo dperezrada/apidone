@@ -15,7 +15,6 @@ set_cors = (response) ->
   response.header "Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,PATCH,DELETE"
 
 app.all "/*", (request, response, next) ->
-  console.log request
   request.collection = retrieve_collection(request)
   set_cors response
   next()

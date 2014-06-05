@@ -16,7 +16,6 @@ var create_movie = function(obj, return_callback){
 };
 
 var update_movie = function(obj, movie_json, return_callback){
-	console.log(utils.absolute_url('/movies/'+obj.movie_id));
 	request.patch({url: utils.absolute_url('/movies/'+obj.movie_id), json: movie_json},
 		function (err, response, body){
 			obj.update_response = response;
@@ -34,7 +33,7 @@ describe('Replace resource by sending PATCH to /<resources>/:resource_id', funct
 		],
 		function(){
 			done();
-		})
+		});
 	});
 	after(function(done){
 		utils.get_connection(
@@ -43,7 +42,7 @@ describe('Replace resource by sending PATCH to /<resources>/:resource_id', funct
 			}
 		);
 	});
-   	it('should return 204 after updating a resource', function(done){
+	it('should return 204 after updating a resource', function(done){
 		assert.equal(204, self.update_response.statusCode);
 		done();
 	});

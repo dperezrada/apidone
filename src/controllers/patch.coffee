@@ -11,7 +11,6 @@ app.patch "/*",  (request, response) ->
     (collection, callback) ->
       collection.findOne _internal_url: local_request.route.params[0], {}, (error, resource) ->
         if resource
-          # console.log(resource_id + " = " +resource.id.toString());
           found_resource = true
           query = {'$set': local_request.body}
           collection.update

@@ -46,7 +46,7 @@ task 'build', 'Build a single JavaScript file from prod files', (options)->
                        , (err) ->
                 handleError(err) if err
                 
-                exec "~/yes.we.code/apidone/node_modules/coffee-script/bin/coffee #{coffee_options}", (err, stdout, stderr) ->
+                exec "coffee #{coffee_options}", (err, stdout, stderr) ->
                     handleError(err) if err
                     message = "Compiled #{target}.js"
                     util.log message
