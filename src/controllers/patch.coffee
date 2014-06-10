@@ -1,4 +1,4 @@
-app.put "/*",  (request, response) ->
+app.patch "/*",  (request, response) ->
   found_resource = false
   splited_url = request.route.params[0].split("/")
   resource_id = splited_url[splited_url.length - 1]
@@ -12,14 +12,14 @@ app.put "/*",  (request, response) ->
       collection.findOne _internal_url: local_request.route.params[0], {}, (error, resource) ->
         if resource
           found_resource = true
-          local_request.body["_id"] = resource["_id"]
+          query = {'$set': local_request.body}
           collection.update
             _internal_url: local_request.route.params[0]
-          , local_request.body, (error, result) ->
+          , query, (error, result) ->
             callback error, resource["_internal_url"], resource["_id"], collection
         else
-          Mongo.insert collection, local_request.body, (err, inserted_docs) ->
-            callback error, local_request.route.params[0], inserted_docs[0]["_id"], collection
+          response.statusCode = 404
+          response.send("Not found")
     , Mongo.update_internal_url
   ], (err, final_url, id) ->
     if err

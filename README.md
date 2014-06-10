@@ -1,7 +1,4 @@
 # APIdone
-## Nodejs version
-	cd node
-
 ### Install
 	
 	npm install -d

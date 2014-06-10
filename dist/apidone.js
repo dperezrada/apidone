@@ -191,7 +191,7 @@ retrieve_collection = function(request) {
 set_cors = function(response) {
   response.header("Access-Control-Allow-Origin", "*");
   response.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
-  return response.header("Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,DELETE");
+  return response.header("Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,PATCH,DELETE");
 };
 
 app.all("/*", function(request, response, next) {
@@ -457,8 +457,59 @@ app["delete"]("/*", function(request, response) {
 
 app.options("/*", function(request, response) {
   response.status(200);
-  response.header("Allow", 'OPTIONS,GET,POST,PUT,DELETE');
+  response.header("Allow", 'OPTIONS,GET,POST,PUT,DELETE,PATCH');
   return response.send("");
+});
+
+app.patch("/*", function(request, response) {
+  var found_resource, local_request, resource_id, splited_url;
+
+  found_resource = false;
+  splited_url = request.route.params[0].split("/");
+  resource_id = splited_url[splited_url.length - 1];
+  if (request.body["id"]) {
+    delete request.body["id"];
+  }
+  local_request = clone_request(request);
+  return async.waterfall([
+    async.apply(Mongo.get_collection, db, local_request.collection), function(collection, callback) {
+      return collection.findOne({
+        _internal_url: local_request.route.params[0]
+      }, {}, function(error, resource) {
+        var query;
+
+        if (resource) {
+          found_resource = true;
+          query = {
+            '$set': local_request.body
+          };
+          return collection.update({
+            _internal_url: local_request.route.params[0]
+          }, query, function(error, result) {
+            return callback(error, resource["_internal_url"], resource["_id"], collection);
+          });
+        } else {
+          response.statusCode = 404;
+          return response.send("Not found");
+        }
+      });
+    }, Mongo.update_internal_url
+  ], function(err, final_url, id) {
+    if (err) {
+      console.error(err);
+      response.statusCode = 500;
+      return response.send("Internal Server Error");
+    } else if (found_resource) {
+      response.statusCode = 204;
+      return response.send();
+    } else {
+      response.statusCode = 201;
+      response.header("Location", final_url);
+      return response.send({
+        id: id
+      });
+    }
+  });
 });
 
 if (!module.parent) {

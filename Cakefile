@@ -12,6 +12,7 @@ coffee_files = [
     'controllers/put'
     'controllers/delete'
     'controllers/options'
+    'controllers/patch'
     'server_start'
 ]
 
