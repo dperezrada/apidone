@@ -463,7 +463,6 @@ app.options("/*", function(request, response) {
 
 app.patch("/*", function(request, response) {
   var found_resource, local_request, resource_id, splited_url;
-
   found_resource = false;
   splited_url = request.route.params[0].split("/");
   resource_id = splited_url[splited_url.length - 1];
@@ -477,7 +476,6 @@ app.patch("/*", function(request, response) {
         _internal_url: local_request.route.params[0]
       }, {}, function(error, resource) {
         var query;
-
         if (resource) {
           found_resource = true;
           query = {
