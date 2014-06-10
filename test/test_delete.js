@@ -103,6 +103,96 @@ describe('Delete all new resource by sending DELETE to /<resources>', function()
 
 });
 
+describe('Delete all new resource by sending DELETE to /<resources>', function(){
+	before(function(done){
+		self = this;
+		self.movies = [
+			{'name': 'The Matrix', 'year': 1999, id:'asd'},
+			{'name': 'Nine queens', 'year': 2000, id: 'asdf'}
+		]
+		async.series(
+			[
+				async.apply(create_movie, self.movies[0], '/movies'),
+				async.apply(create_movie, self.movies[1], '/movies'),
+				function(callback){
+					request.del({
+						url: utils.absolute_url('/movies/asd?_remove=all')
+					}, function(err, response){
+						self.delete_response = response;
+						done();
+					});
+				}
+			],
+			function(err, results){done();}
+		);
+	});
+	after(function(done){
+		utils.get_connection(
+			function(err, db){
+				require('./libs/tear_down')(db, done);
+			}
+		);
+	});
+	it('should return 204 as status code', function(done){
+		assert.equal(204, self.delete_response.statusCode);
+		done();
+	});
+	it('should not be able to get the resource', function(done){
+		request.get({
+			url: utils.absolute_url('/movies')
+		}, function(err, response){
+			assert.deepEqual([{"id": "asdf", "name": "Nine queens", "year": 2000}], JSON.parse(response.body));
+			done();
+		});
+	});
+
+});
+
+describe('Delete all new resource by sending DELETE to /<resources> with parenthesis', function(){
+	before(function(done){
+		self = this;
+		self.movies = [
+			{'name': 'The Matrix', 'year': 1999},
+			{'name': 'Nine queens', 'year': 2000}
+		]
+		async.series(
+			[
+				async.apply(create_movie, self.movies[0], '/movies(new)'),
+				async.apply(create_movie, self.movies[1], '/movies(new)'),
+				function(callback){
+					request.del({
+						url: utils.absolute_url('/movies(new)?_remove=all')
+					}, function(err, response){
+						self.delete_response = response;
+						done();
+					});
+				}
+			],
+			function(err, results){done();}
+		);
+	});
+	after(function(done){
+		utils.get_connection(
+			function(err, db){
+				require('./libs/tear_down')(db, done);
+			}
+		);
+	});
+	it('should return 204 as status code', function(done){
+		assert.equal(204, self.delete_response.statusCode);
+		done();
+	});
+	it('should not be able to get the resource', function(done){
+		request.get({
+			url: utils.absolute_url('/movies(new)')
+		}, function(err, response){
+			assert.equal('[]', response.body);
+			done();
+		});
+	});
+
+});
+
 describe('Delete new resource by sending DELETE to /<resources>/:resource_id when created in /<resources>/ (with final slash)', function(){
 	before(function(done){
 		self = this;
