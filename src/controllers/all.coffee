@@ -12,7 +12,7 @@ retrieve_collection = (request) ->
 set_cors = (response) ->
   response.header "Access-Control-Allow-Origin", "*"
   response.header "Access-Control-Allow-Headers", "X-Requested-With,Content-Type"
-  response.header "Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,DELETE"
+  response.header "Access-Control-Allow-Methods", "OPTIONS,GET,HEAD,POST,PUT,PATCH,DELETE"
 
 app.all "/*", (request, response, next) ->
   request.collection = retrieve_collection(request)

@@ -1,5 +1,6 @@
 var request = require('request')
 	, assert = require('assert');
+_ = require("underscore")
 var async = require('async');
 var utils = require('./libs/utils');
 var self;
@@ -44,7 +45,7 @@ describe('List all resources', function(){
 		);
 	});
 	it('should receive all the existing resources on GET /__resources ', function(done){
-		assert.deepEqual(self.resources_list, [{name: 'countries'}, {name: 'movies'}]);
+		assert.deepEqual(_.sortBy(self.resources_list, 'name'), [{name: 'countries'}, {name: 'movies'}]);
 		done();
 	});
 	it('should receive all the existing resources on GET /countries/:id/__resources ', function(done){
